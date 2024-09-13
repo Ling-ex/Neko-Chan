@@ -17,7 +17,7 @@ async def reply_text(
             text=text,
             quote=quote,
             *args,
-            *kwargs,
+            **kwargs,
         )
         return msg
     except (
@@ -29,7 +29,7 @@ async def reply_text(
             text=text,
             quote=quote,
             *args,
-            *kwargs,
+            **kwargs,
         )
     except (
         errors.TopicClosed,
@@ -45,12 +45,12 @@ async def edit_text(
 ) -> 'Message':
     try:
         msg = await self.edit_text(
-            text=text, *args, *kwargs,
+            text=text, *args, **kwargs,
         )
         return msg
     except errors.FloodWait as f:
         await asyncio.sleep(f.value)
-        return await self.edit_text(text=text, *args, *kwargs)
+        return await self.edit_text(text=text, *args, **kwargs)
     except (
         errors.ChatWriteForbidden,
         errors.ChatAdminRequired,

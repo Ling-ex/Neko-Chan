@@ -1,5 +1,8 @@
+import re
 import time
+from datetime import datetime
 from datetime import timedelta
+from typing import Optional
 
 
 def usec() -> int:
@@ -77,6 +80,44 @@ def format_duration_td(value: timedelta, precision: int = 0) -> str:
         return ''.join(pieces)
 
     return ''.join(pieces[:precision])
+
+
+def format_datetime(text: str) -> Optional[datetime]:
+    """
+    Calculates a future datetime based on time deltas
+    specified in the input text.
+
+    Parameters:
+        text (str): A string containing time deltas in the format '',
+                    where  can be 'd' (days), 'h' (hours), 'm' (minutes),
+                    or 's' (seconds).
+
+    Returns:
+        datetime: A datetime object representing the current time
+                  plus the specified time deltas.
+                  Returns None if no valid matches are found.
+    """
+
+    if matches := re.findall(r'([0-9]+)([dhms])', text.lower()):
+        now = datetime.now()
+        total_delta = timedelta()
+
+        for number, unit in matches:
+            number = int(number)
+            if unit == 'd':
+                total_delta += timedelta(days=number)
+            elif unit == 'h':
+                total_delta += timedelta(hours=number)
+            elif unit == 'm':
+                total_delta += timedelta(minutes=number)
+            elif unit == 's':
+                total_delta += timedelta(seconds=number)
+
+        future_time = now + total_delta
+        return future_time
+
+    else:
+        return None
 
 
 start_time = usec()
