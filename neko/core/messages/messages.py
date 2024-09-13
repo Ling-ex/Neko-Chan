@@ -11,7 +11,7 @@ async def reply_text(
     quote: bool = True,
     *args,
     **kwargs: typing.Any,
-) -> "Message":
+) -> 'Message':
     try:
         msg = await self.reply_text(
             text=text,
@@ -42,7 +42,7 @@ async def reply_text(
 
 async def edit_text(
     self: Message, text: str, *args, **kwargs: typing.Any,
-) -> "Message":
+) -> 'Message':
     try:
         msg = await self.edit_text(
             text=text, *args, *kwargs,
@@ -52,11 +52,13 @@ async def edit_text(
         await asyncio.sleep(f.value)
         return await self.edit_text(text=text, *args, *kwargs)
     except (
-        errors.ChatWriteForbidden,                                 errors.ChatAdminRequired,
+        errors.ChatWriteForbidden,
+        errors.ChatAdminRequired,
         errors.ChatSendPlainForbidden,
         errors.MessageNotModified,
     ):
         return self.stop_propagation()
+
 
 async def delete(
     self: Message, revoke: bool = True,

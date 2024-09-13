@@ -1,10 +1,13 @@
-import sys
 import logging
+import sys
+
+from pydantic_core import ValidationError
 from pydantic_settings import BaseSettings
 from pydantic_settings import SettingsConfigDict
-from pydantic_core import ValidationError
 
-log = logging.getLogger("Config")
+
+log = logging.getLogger('Config')
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -17,6 +20,7 @@ class Settings(BaseSettings):
     MONGO_URL: str
     OWNER: int = 5050907047
 
+
 try:
     Config = Settings()
 except ValidationError as e:
@@ -24,12 +28,12 @@ except ValidationError as e:
     for error in errors:
         field = error['loc'][0]
         if field == 'API_ID':
-            log.info("API_ID is missing")
+            log.info('API_ID is missing')
         elif field == 'API_HASH':
-            log.info("API_HASH is missing")
+            log.info('API_HASH is missing')
         elif field == 'BOT_TOKEN':
-            log.info("BOT_TOKEN is missing")
+            log.info('BOT_TOKEN is missing')
         elif field == 'MONGO_URL':
-            log.info("MONGO_URL is missing")
+            log.info('MONGO_URL is missing')
 
     sys.exit(1)

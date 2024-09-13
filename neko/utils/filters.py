@@ -1,4 +1,5 @@
-from pyrogram import filters, types
+from pyrogram import filters
+from pyrogram import types
 
 from config import Config
 
@@ -11,4 +12,4 @@ def owner_only():
 
         return False
 
-    return filters.create(func, "FilterOwnerOnly")
+    return filters.create(func, 'FilterOwnerOnly')

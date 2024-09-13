@@ -25,7 +25,10 @@ from neko.utils.filters import owner_only
 def format_exception(
     exp: BaseException, tb: Optional[List[traceback.FrameSummary]] = None,
 ) -> str:
-    """Formats an exception traceback as a string, similar to the Python interpreter."""
+    """
+    Formats an exception traceback as a string,
+    similar to the Python interpreter.
+    """
 
     if tb is None:
         tb = traceback.extract_tb(exp.__traceback__)
@@ -38,10 +41,10 @@ def format_exception(
 
     stack = ''.join(traceback.format_list(tb))
     msg = str(exp)
-    if msg:
+    if msg:  # noqa: E501
         msg = f': {msg}'
 
-    return f'Traceback (most recent call last):\n{stack}{type(exp).__name__}{msg}'
+    return f'Traceback (most recent call last):\n{stack}{type(exp).__name__}{msg}'  # noqa: E501
 
 
 @Client.on_message(filters.command(['e', 'ev']) & owner_only())
@@ -79,7 +82,7 @@ async def eval_handler(c: Client, m: types.Message):
             first_snip_idx = -1
             tb = traceback.extract_tb(e.__traceback__)
             for i, frame in enumerate(tb):
-                if frame.filename == '<string>' or frame.filename.endswith('ast.py'):
+                if frame.filename == '<string>' or frame.filename.endswith('ast.py'):  # noqa: E501
                     first_snip_idx = i
                     break
             # Re-raise exception if it wasn't caused by the snippet
@@ -117,11 +120,17 @@ Time: {el_str}"""
                 caption = 'Input is to long'
             try:
                 await m.reply_document(
-                    document=out_file, caption=caption, disable_notification=True, parse_mode=enums.parse_mode.ParseMode.HTML,
+                    document=out_file,
+                    caption=caption,
+                    disable_notification=True,
+                    parse_mode=enums.parse_mode.ParseMode.HTML,
                 )
             except errors.MediaCaptionTooLong:
                 await m.reply_document(
-                    document=out_file, caption='input is to long', disable_notification=True, parse_mode=enums.parse_mode.ParseMode.HTML,
+                    document=out_file,
+                    caption='input is to long',
+                    disable_notification=True,
+                    parse_mode=enums.parse_mode.ParseMode.HTML,
                 )
         return None
     return await m.reply_msg(

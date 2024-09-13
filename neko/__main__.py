@@ -8,7 +8,7 @@ except ImportError:
 else:
     uvloop.install()
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     bot = Client()
     try:
         bot.run()

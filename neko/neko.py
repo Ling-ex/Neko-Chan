@@ -1,34 +1,34 @@
 import logging
+
 import colorlog
 from motor.motor_asyncio import AsyncIOMotorClient
-
 from pyrogram import Client as RawClient
-from pyrogram import raw
 from pyrogram import errors
+from pyrogram import raw
 
 from config import Config
 
 
-log = logging.getLogger("Neko")
+log = logging.getLogger('Neko')
 
 
 class Client(RawClient):
     def __init__(self) -> None:
         connection = AsyncIOMotorClient(Config.MONGO_URL)
         super().__init__(
-            "Neko_Session",
+            'Neko_Session',
             api_id=Config.API_ID,
             api_hash=Config.API_HASH,
             bot_token=Config.BOT_TOKEN,
             plugins=dict(
-                root="neko.plugins",
+                root='neko.plugins',
             ),
             mongodb=dict(
                 connection=connection,
                 remove_peers=False,
             ),
             in_memory=True,
-            sleep_threshold=180
+            sleep_threshold=180,
         )
         self.config = Config
         self.db = connection.neko
@@ -36,14 +36,14 @@ class Client(RawClient):
 
     async def start(self) -> None:
         self._setup_log()
-        self.log.info("Starting bot...")
+        self.log.info('Starting bot...')
         await super().start()
-        self.log.info("---[Bot Started]---")
+        self.log.info('---[Bot Started]---')
         await self.catch_up()
-        self.log.info("---[Gaps Restored]---")
+        self.log.info('---[Gaps Restored]---')
 
     async def stop(self, block: bool = False) -> None:
-        self.log.info("---[Saving state...]---")
+        self.log.info('---[Saving state...]---')
         db = self.db.bot_settings
         state = await self.invoke(raw.functions.updates.GetState())
         value = {
@@ -54,53 +54,55 @@ class Client(RawClient):
         await db.update_one(
             {'name': 'state'},
             {
-                "$set": {'value': value},
+                '$set': {'value': value},
             },
             upsert=True,
         )
         await super().stop(block=block)
-        self.log.info("---[Bot Stopped]---")
+        self.log.info('---[Bot Stopped]---')
 
     def _setup_log(self):
-            """Configures logging"""
-            level = logging.WARNING
-            logging.root.setLevel(level)
+        """Configures logging"""
+        level = logging.WARNING
+        logging.root.setLevel(level)
 
-            # Color log config
-            log_color: bool = True
+        # Color log config
+        log_color: bool = True
 
-            file_format = "[ %(asctime)s: %(levelname)-8s ] %(name)-15s - %(message)s"
-            logfile = logging.FileHandler("neko.txt")
-            formatter = logging.Formatter(file_format, datefmt="%H:%M:%S")
-            logfile.setFormatter(formatter)
-            logfile.setLevel(level)
+        file_format = '[ %(asctime)s: %(levelname)-8s ] %(name)-15s - %(message)s'  # noqa: E501
+        logfile = logging.FileHandler('neko.txt')
+        formatter = logging.Formatter(file_format, datefmt='%H:%M:%S')
+        logfile.setFormatter(formatter)
+        logfile.setLevel(level)
 
-            if log_color:
-                formatter = colorlog.ColoredFormatter(
-                    "  %(log_color)s%(levelname)-8s%(reset)s  |  "
-                    "%(name)-15s  |  %(log_color)s%(message)s%(reset)s"
-                )
-            else:
-                formatter = logging.Formatter("  %(levelname)-8s  |  %(name)-15s  |  %(message)s")
-            stream = logging.StreamHandler()
-            level = logging.INFO
-            stream.setLevel(level)
-            stream.setFormatter(formatter)
+        if log_color:
+            formatter = colorlog.ColoredFormatter(
+                '  %(log_color)s%(levelname)-8s%(reset)s  |  '
+                '%(name)-15s  |  %(log_color)s%(message)s%(reset)s',
+            )
+        else:
+            formatter = logging.Formatter(
+                '  %(levelname)-8s  |  %(name)-15s  |  %(message)s',
+            )
+        stream = logging.StreamHandler()
+        level = logging.INFO
+        stream.setLevel(level)
+        stream.setFormatter(formatter)
 
-            root = logging.getLogger()
-            root.setLevel(level)
-            root.addHandler(stream)
-            root.addHandler(logfile)
+        root = logging.getLogger()
+        root.setLevel(level)
+        root.addHandler(stream)
+        root.addHandler(logfile)
 
-            # Logging necessary for selected libs
-            logging.getLogger("pyrogram").setLevel(logging.ERROR)
+        # Logging necessary for selected libs
+        logging.getLogger('pyrogram').setLevel(logging.ERROR)
 
     async def catch_up(self):
-        self.log.info("---[Recovering gaps...]---")
+        self.log.info('---[Recovering gaps...]---')
         db = self.db.bot_settings
         state = await db.find_one({'name': 'state'})
         if not state:
-                return
+            return
         value = state['value']
         pts = value['pts']
         date = value['date']
@@ -112,7 +114,7 @@ class Client(RawClient):
                     raw.functions.updates.GetDifference(
                         pts=pts,
                         date=date,
-                        qts=0
+                        qts=0,
                     ),
                 )
             except errors.PersistentTimestampInvalid:
@@ -139,16 +141,18 @@ class Client(RawClient):
             for msg in diff.new_messages:
                 self.dispatcher.updates_queue.put_nowait((
                     raw.types.UpdateNewMessage(
-                            message=msg,
-                            pts=new_state.pts,
-                            pts_count=-1
+                        message=msg,
+                        pts=new_state.pts,
+                        pts_count=-1,
                     ),
                     users,
                     chats,
                 ))
 
             for update in diff.other_updates:
-                self.dispatcher.updates_queue.put_nowait((update, users, chats))
+                self.dispatcher.updates_queue.put_nowait(
+                    (update, users, chats),
+                )
             if isinstance(diff, raw.types.updates.Difference):
                 await db.delete_one({'name': 'state'})
                 break
