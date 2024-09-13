@@ -81,7 +81,7 @@ async def ban_member_handler(c: Client, m: types.Message):
             await m.chat.unban_member(user_id)
         except errors.ChatAdminRequired:
             return await m.chat.leave()
-        except errors.errors.UserAdminInvalid:
+        except errors.UserAdminInvalid:
             return await m.reply_msg(
                 (
                     'The action requires admin privileges. '
@@ -174,7 +174,7 @@ async def muted_member_handler(c: Client, m: types.Message):
             )
         except errors.ChatAdminRequired:
             return await m.chat.leave()
-        except errors.errors.UserAdminInvalid:
+        except errors.UserAdminInvalid:
             return await m.reply_msg(
                 (
                     'The action requires admin privileges. '
@@ -207,7 +207,7 @@ async def muted_member_handler(c: Client, m: types.Message):
         await m.chat.restrict_member(**_format)
     except errors.ChatAdminRequired:
         return await m.chat.leave()
-    except errors.errors.UserAdminInvalid:
+    except errors.UserAdminInvalid:
         return await m.reply_msg(
             (
                 'The action requires admin privileges. '
