@@ -48,8 +48,10 @@ async def check_perms(
         return True
     if user.status != enums.ChatMemberStatus.ADMINISTRATOR:
         await method(
-            "I can't perform this action because I'm not an administrator.",
-            quote=True,
+            (
+                'You cannot perform this action because '
+                'you are not an administrator.'
+            ),
         )
         return False
     if not permissions and user.status == enums.ChatMemberStatus.ADMINISTRATOR:
