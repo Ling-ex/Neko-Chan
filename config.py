@@ -18,7 +18,10 @@ class Settings(BaseSettings):
     API_HASH: str
     BOT_TOKEN: str
     MONGO_URL: str
+
+    # Some Configuration
     OWNER: int = 5050907047
+    CHAT_ID: int = 0
 
 
 try:

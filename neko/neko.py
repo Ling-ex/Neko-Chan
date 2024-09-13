@@ -6,16 +6,17 @@ from pyrogram import Client as RawClient
 from pyrogram import errors
 from pyrogram import raw
 
+from .core.schedule import Scheduler
 from config import Config
 
 
 log = logging.getLogger('Neko')
 
 
-class Client(RawClient):
+class Client(RawClient, Scheduler):
     def __init__(self) -> None:
         connection = AsyncIOMotorClient(Config.MONGO_URL)
-        super().__init__(
+        super().__init__(  # type: ignore
             'Neko_Session',
             api_id=Config.API_ID,
             api_hash=Config.API_HASH,
@@ -41,6 +42,7 @@ class Client(RawClient):
         self.log.info('---[Bot Started]---')
         await self.catch_up()
         self.log.info('---[Gaps Restored]---')
+        await self.start_sch()
 
     async def stop(self, block: bool = False) -> None:
         self.log.info('---[Saving state...]---')
