@@ -168,6 +168,7 @@ async def user_and_reason(
 
     text = msg.text
     args = text.strip().split()
+    user, reason = None, None
     if rep := msg.reply_to_message:
         if user := rep.from_user:
             user = user.id
