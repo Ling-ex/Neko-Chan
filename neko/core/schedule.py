@@ -25,7 +25,7 @@ class Scheduler(Manager):
         # only run at 00:15
         self.scheduler.add_job(
             self.update_members,
-            'cron', hour=22, minute=51,
+            'cron', hour=0, minute=15,
         )
         # run the schedule im asyncIO
         self.scheduler.start()
