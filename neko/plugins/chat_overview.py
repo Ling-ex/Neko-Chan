@@ -3,9 +3,11 @@ from pyrogram import types
 
 from neko.models import members
 from neko.neko import Client
+from neko.utils import func
 
 
 @Client.on_message(filters.command('add_chat_overview'))
+@func.require_admin([])
 async def add_chat_overview(c: Client, m: types.Message):
     chat = m.chat
     if await members.get_chat(chat.id):
@@ -22,6 +24,7 @@ async def add_chat_overview(c: Client, m: types.Message):
 
 
 @Client.on_message(filters.command('del_chat_overview'))
+@func.require_admin([])
 async def del_chat_overview(c: Client, m: types.Message):
     chat = m.chat
     if not await members.get_chat(chat.id):
