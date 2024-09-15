@@ -1,12 +1,12 @@
 import logging
 
 import colorlog
-from motor.motor_asyncio import AsyncIOMotorClient
 from pyrogram import Client as RawClient
 from pyrogram import errors
 from pyrogram import raw
 
 from .core.schedule import Scheduler
+from .models import connection
 from config import Config
 
 
@@ -15,7 +15,6 @@ log = logging.getLogger('Neko')
 
 class Client(RawClient, Scheduler):
     def __init__(self) -> None:
-        connection = AsyncIOMotorClient(Config.MONGO_URL)
         super().__init__(  # type: ignore
             'Neko_Session',
             api_id=Config.API_ID,
@@ -28,7 +27,7 @@ class Client(RawClient, Scheduler):
                 connection=connection,
                 remove_peers=False,
             ),
-            in_memory=True,
+            in_memory=False,
             sleep_threshold=180,
         )
         self.config = Config
@@ -98,6 +97,8 @@ class Client(RawClient, Scheduler):
 
         # Logging necessary for selected libs
         logging.getLogger('pyrogram').setLevel(logging.ERROR)
+        logging.getLogger('apscheduler').setLevel(logging.WARNING)
+        logging.getLogger('httpx').setLevel(logging.ERROR)
 
     async def catch_up(self):
         self.log.info('---[Recovering gaps...]---')

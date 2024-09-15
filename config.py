@@ -1,12 +1,8 @@
-import logging
 import sys
 
 from pydantic_core import ValidationError
 from pydantic_settings import BaseSettings
 from pydantic_settings import SettingsConfigDict
-
-
-log = logging.getLogger('Config')
 
 
 class Settings(BaseSettings):
@@ -31,12 +27,19 @@ except ValidationError as e:
     for error in errors:
         field = error['loc'][0]
         if field == 'API_ID':
-            log.info('API_ID is missing')
+            print('API_ID is missing')
         elif field == 'API_HASH':
-            log.info('API_HASH is missing')
+            print('API_HASH is missing')
         elif field == 'BOT_TOKEN':
-            log.info('BOT_TOKEN is missing')
+            print('BOT_TOKEN is missing')
         elif field == 'MONGO_URL':
-            log.info('MONGO_URL is missing')
+            print('MONGO_URL is missing')
+        else:
+            print(
+                (
+                    'Make sure the ENV is valid and there '
+                    'are no typos or filling errors!'
+                ),
+            )
 
     sys.exit(1)
