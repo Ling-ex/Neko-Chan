@@ -1,14 +1,13 @@
 from pyrogram import enums
-from pyrogram import filters
 from pyrogram import types
 
-from config import Config
 from neko.models import members
 from neko.neko import Client
+from neko.utils.filters import chats_overview
 
 
 @Client.on_chat_member_updated(
-    filters.chat(Config.CHAT_ID),
+    chats_overview,
     group=69,
 )
 async def handler_update_member(

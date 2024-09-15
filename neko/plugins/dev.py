@@ -47,7 +47,7 @@ def format_exception(
     return f'Traceback (most recent call last):\n{stack}{type(exp).__name__}{msg}'  # noqa: E501
 
 
-@Client.on_message(filters.command(['e', 'ev']) & owner_only())
+@Client.on_message(filters.command(['e', 'ev']) & owner_only)
 async def eval_handler(c: Client, m: types.Message):
     if len(m.command) == 1:
         return await m.reply_msg("<pre language='python'>None</pre>")
