@@ -184,7 +184,6 @@ async def cb_cancel_pin_msg(_, cb: types.CallbackQuery):
     & filters.text
     & ~admins_only()
     & filters.incoming,
-    group=99,
 )
 async def report_admin_handler(c: Client, m: types.Message):
     if m.text.lower().startswith(('@admin', '@admins', '/report')):
