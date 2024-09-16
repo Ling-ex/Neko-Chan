@@ -1,14 +1,13 @@
 import asyncio
 
+from pyrogram import enums
 from pyrogram import errors
 from pyrogram import filters
 from pyrogram import types
-from pyrogram import enums
 from pyrogram.helpers import ikb
 
 from neko.neko import Client
 from neko.utils.func import require_admin
-
 
 
 def admins_only():
@@ -24,7 +23,7 @@ def admins_only():
         ):
             return False
 
-        if user.status in (enums.ChatMemberStatus.ADMINISTRATOR, enums.ChatMemberStatus.OWNER):
+        if user.status in (enums.ChatMemberStatus.ADMINISTRATOR, enums.ChatMemberStatus.OWNER):  # noqa: E501
             return True
         return False
 
@@ -192,7 +191,7 @@ async def report_admin_handler(c: Client, m: types.Message):
         reason = m.text.split(None, 1)[1] if len(m.text.split()) > 1 else None
         text = f"""
 <b>⚠️ ATTENTION!</b>
-{user.full_name} [<code>{user.id}</code>] requires admin action in Group: <b>{chat.title}</b>"""
+{user.full_name} [<code>{user.id}</code>] requires admin action in Group: <b>{chat.title}</b>"""  # noqa: E501
         if reason is not None:
             text += f'\n\n<b>Reason:</b> \n<blockquote>{reason}</blockquote>'
         admins: list[int] = []
@@ -202,7 +201,7 @@ async def report_admin_handler(c: Client, m: types.Message):
             await asyncio.sleep(f.value)
             members = chat.get_members()
         async for admin in members:
-            if admin.status in (enums.ChatMemberStatus.ADMINISTRATOR, enums.ChatMemberStatus.OWNER):
+            if admin.status in (enums.ChatMemberStatus.ADMINISTRATOR, enums.ChatMemberStatus.OWNER):  # noqa: E501
                 if admin.user.is_deleted or admin.user.is_bot:
                     continue
                 if admin.user.id not in admins:
@@ -221,5 +220,5 @@ async def report_admin_handler(c: Client, m: types.Message):
             ):
                 continue
             except Exception as e:
-                c.log.info(f"admin (report): {str(e)}")
+                c.log.info(f'admin (report): {str(e)}')
         return await m.reply_msg('Report sent.', quote=False)

@@ -1,6 +1,7 @@
 import asyncio
 import typing
-from datetime import datetime, timedelta
+from datetime import datetime
+from datetime import timedelta
 
 from pyrogram import errors
 from pyrogram.types import Message
@@ -76,7 +77,7 @@ async def delete(
 
 @property  # type: ignore
 def date(self: Message) -> datetime:
-    return self.date + timedelta(hours = 7)
+    return self.date + timedelta(hours=7)
 
 
 Message.reply_msg = reply_text
