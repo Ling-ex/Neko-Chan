@@ -1,8 +1,9 @@
 import re
 
 from pyrogram import enums
-from pyrogram import types
+from pyrogram import errors
 from pyrogram import filters
+from pyrogram import types
 from pyrogram.helpers import ikb
 
 from neko.neko import Client
@@ -27,7 +28,7 @@ async def tag_logger_handler(c: Client, m: types.Message):
                     user = await c.get_users(found[num])
                     if user == m.from_user.id:
                         user = None
-                except:
+                except Exception:
                     num += 1
                     continue
             elif (entity[num].type) == enums.MessageEntityType.TEXT_MENTION:
@@ -40,9 +41,9 @@ async def tag_logger_handler(c: Client, m: types.Message):
     if m.from_user and user.id == m.from_user.id:
         return m.stop_propagation()
     if m.from_user:
-        tag_by = "@" + m.from_user.username if m.from_user.username else m.from_user.mention
+        tag_by = '@' + m.from_user.username if m.from_user.username else m.from_user.mention  # noqa: E501
     else:
-        tag_by = "Anon"
+        tag_by = 'Anon'
     text = f"""
 <b><u>You have been tagged</u></b>
 • <b>From:</b> {tag_by}
@@ -61,4 +62,4 @@ async def tag_logger_handler(c: Client, m: types.Message):
     ):
         pass
     except Exception as e:
-        c.log.info(f"admin (report): {str(e)}")
+        c.log.info(f'admin (report): {str(e)}')
