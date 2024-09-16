@@ -13,7 +13,7 @@ from neko.neko import Client
     filters.group
     & ~filters.bot & ~filters.via_bot
     & filters.text
-    & filters.incoming
+    & filters.incoming,
     group=99,
 )
 async def tag_logger_handler(c: Client, m: types.Message):
