@@ -1,6 +1,7 @@
 import inspect
 import io
 import os
+import subprocess
 import sys
 import traceback
 import uuid
@@ -9,14 +10,18 @@ from typing import Any
 from typing import List
 from typing import Optional
 
+import aiofiles  # type: ignore
 import pyrogram
 from meval import meval
+from pydantic_core import ValidationError
 from pyrogram import enums
 from pyrogram import errors
 from pyrogram import filters
 from pyrogram import raw
 from pyrogram import types
+from pyrogram.helpers import ikb
 
+from config import Config
 from neko.neko import Client
 from neko.utils import time
 from neko.utils.filters import owner_only
@@ -137,3 +142,66 @@ Time: {el_str}"""
         result,
         parse_mode=enums.parse_mode.ParseMode.HTML,
     )
+
+
+repo_url, branch = None, None
+try:
+    repo_url = Config.REPO_URL
+    branch = Config.REPO_BRANCH
+except ValidationError as e:
+    validate_er = e.errors()
+    for er in validate_er:
+        field = er['loc'][0]
+        if field == 'REPO_URL':
+            repo_url = None
+        elif field == 'REPO_BRANCH':
+            branch = None
+
+
+@Client.on_message(filters.command('update') & filters.user(Config.OWNER))
+async def update_repo(c: Client, m: types.Message):
+    output = subprocess.check_output(['git', 'pull']).decode('UTF-8')
+    if 'Already up to date.' in output:
+        return await m.reply_text(output)
+
+    bttn = ikb(
+        [[
+            ('Update', 'repo update'),
+            ('Cancel', 'repo cancel'),
+        ]],
+    )
+
+    if len(output) > 4096:
+        with aiofiles.open('update_log.txt', 'w') as f:
+            await f.write(output)
+        await m.reply_document(
+            'update_log.txt',
+            caption='Update available:',
+            reply_markup=bttn,
+        )
+        os.remove('update_log.txt')
+    else:
+        return await m.reply_text(
+            f'Update available:\n\n{output}',
+            reply_markup=bttn,
+        )
+
+
+@Client.on_callback_query(filters.regex('repo'))
+async def handle_callback_query(_, cb: types.CallbackQuery):
+    data = cb.data.split()[1]
+    if data == 'update':
+        text = cb.message.text.html if cb.message.text else cb.message.caption
+        msg = await cb.message.edit_text(
+            text + '\n\nRestarting server...',
+        )
+
+        async with aiofiles.open('pickup.txt', 'w') as wr:
+            await wr.write(f'{msg.chat.id}\n{msg.id}')
+
+        await cb.answer()
+        os.execvp(sys.executable, [sys.executable, '-m', 'neko'])
+
+    elif data == 'cancel':
+        await cb.message.edit_text('Update cancelled!')
+        return await cb.answer()

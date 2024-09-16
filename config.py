@@ -18,6 +18,8 @@ class Settings(BaseSettings):
     # Some Configuration
     OWNER: int = 5050907047
     CHAT_ID: int = 0
+    REPO_URL: str = 'https://github.com/Ling-ex/Neko-Chan'
+    REPO_BRANCH: str = 'dev'
 
 
 try:

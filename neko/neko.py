@@ -1,5 +1,7 @@
 import logging
+import os
 
+import aiofiles  # type: ignore
 import colorlog
 from pyrogram import Client as RawClient
 from pyrogram import errors
@@ -41,6 +43,7 @@ class Client(RawClient, Scheduler):
         self.log.info('---[Bot Started]---')
         await self.catch_up()
         self.log.info('---[Gaps Restored]---')
+        await self.read_pickup()
         await self.start_sch()
 
     async def stop(self, block: bool = False) -> None:
@@ -159,3 +162,28 @@ class Client(RawClient, Scheduler):
             if isinstance(diff, raw.types.updates.Difference):
                 await db.delete_one({'name': 'state'})
                 break
+
+    async def read_pickup(self) -> None:
+        """
+        Reads the chat ID and message ID from 'pickup.txt'
+        and edits the message
+        to indicate that the server has restarted successfully.
+        If the file does not exist, it exits without doing anything.
+        After processing, the file is deleted.
+        """
+        file = 'pickup.txt'
+        if not os.path.exists(file):
+            return
+        self.log.info('Reading from pickup.txt ....')
+        try:
+            async with aiofiles.open(file, 'r') as rd:
+                content = await rd.read()
+                chat_id, msg_id = map(int, content.strip().split('\n'))
+                await self.edit_message_text(
+                    chat_id,
+                    msg_id,
+                    'Server restarted successfully!',
+                )
+        except Exception as e:
+            self.log.info(f'Error reading from pickup.txt: {e}')
+        os.remove(file)
