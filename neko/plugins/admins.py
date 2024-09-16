@@ -194,7 +194,7 @@ async def report_admin_handler(c: Client, m: types.Message):
 <b>⚠️ ATTENTION!</b>
 {user.full_name} [<code>{user.id}</code>] requires admin action in Group: <b>{chat.title}</b>"""
         if reason is not None:
-            text += f'\n\n<b>Reason:</b> \n<blackquote>{reason}</blackquote>'
+            text += f'\n\n<b>Reason:</b> \n<blockquote>{reason}</blockquote>'
         admins: list[int] = []
         try:
             members = chat.get_members()
