@@ -214,8 +214,12 @@ async def report_admin_handler(c: Client, m: types.Message):
                     text,
                     reply_markup=ikb([[('👉🏻 Go to messages', m.link, 'url')]]),
                 )
-            except errors.PeerIdInvalid:
+            except (
+                errors.PeerIdInvalid,
+                errors.InputUserDeactivated,
+                errors.UserIsBlocked,
+            ):
                 continue
             except Exception as e:
-                c.logger.info(str(e))
+                c.log.info(f"admin (report): {str(e)}")
         return await m.reply_msg('Report sent.', quote=False)
