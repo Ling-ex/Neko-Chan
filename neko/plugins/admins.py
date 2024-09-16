@@ -1,10 +1,34 @@
+import asyncio
+
 from pyrogram import errors
 from pyrogram import filters
 from pyrogram import types
+from pyrogram import enums
 from pyrogram.helpers import ikb
 
 from neko.neko import Client
-from neko.utils import func
+from neko.utils.func import require_admin
+
+
+
+def admins_only():
+    async def func(_, c: Client, msg: types.Message | types.CallbackQuery):
+        m = msg.message if isinstance(msg, types.CallbackQuery) else msg
+        if sender := m.sender_chat:
+            return True if sender.id == m.chat.id else False
+        try:
+            user = await m.chat.get_member(msg.from_user.id)
+        except (
+            errors.UserNotParticipant,
+            errors.PeerIdInvalid,
+        ):
+            return False
+
+        if user.status in (enums.ChatMemberStatus.ADMINISTRATOR, enums.ChatMemberStatus.OWNER):
+            return True
+        return False
+
+    return filters.create(func, 'FilterOnlyAdmins')
 
 
 # Pin Chats
@@ -15,7 +39,7 @@ from neko.utils import func
         'unpinall',
     ]) & ~filters.private,
 )
-@func.require_admin('can_pin_messages')
+@require_admin('can_pin_messages')
 async def pin_msg_handler(_, m: types.Message):
     if m.command[0] == 'pinned':
         try:
@@ -99,7 +123,7 @@ async def pin_msg_handler(_, m: types.Message):
 
 
 @Client.on_callback_query(filters.regex(r'^_pinned'))
-@func.require_admin('can_pin_messages')
+@require_admin('can_pin_messages')
 async def cb_pinned_handler(c: Client, cb: types.CallbackQuery):
     try:
         await cb.answer()
@@ -142,7 +166,7 @@ async def cb_pinned_handler(c: Client, cb: types.CallbackQuery):
 
 
 @Client.on_callback_query(filters.regex(r'^cancel_pin'))
-@func.require_admin('can_pin_messages')
+@require_admin('can_pin_messages')
 async def cb_cancel_pin_msg(_, cb: types.CallbackQuery):
     tipe = cb.data.strip().split(None, 1)[1].strip()
     await cb.answer()
@@ -151,3 +175,48 @@ async def cb_cancel_pin_msg(_, cb: types.CallbackQuery):
     else:
         text = '<i>Cancels the Unpinall action.</i>'
     return await cb.message.edit_msg(text)
+
+
+# Report to admin
+@Client.on_message(
+    filters.group &
+    ~filters.bot & ~filters.via_bot
+    & filters.text
+    & ~admins_only()
+    & filters.incoming,
+    group=99,
+)
+async def report_admin_handler(c: Client, m: types.Message):
+    if m.text.lower().startswith(('@admin', '@admins', '/report')):
+        user = m.from_user
+        chat = m.chat
+        reason = m.text.split(None, 1)[1] if len(m.text.split()) > 1 else None
+        text = f"""
+<b>⚠️ ATTENTION!</b>
+{user.full_name} [<code>{user.id}</code>] requires admin action in Group: <b>{chat.title}</b>"""
+        if reason is not None:
+            text += f'\n\n<b>Reason:</b> \n<blackquote>{reason}</blackquote>'
+        admins: list[int] = []
+        try:
+            members = chat.get_members()
+        except errors.FloodWait as f:
+            await asyncio.sleep(f.value)
+            members = chat.get_members()
+        async for admin in members:
+            if admin.status in (enums.ChatMemberStatus.ADMINISTRATOR, enums.ChatMemberStatus.OWNER):
+                if admin.user.is_deleted or admin.user.is_bot:
+                    continue
+                if admin.user.id not in admins:
+                    admins.append(admin.user.id)
+        for user in admins:
+            try:
+                await c.send_message(
+                    user,
+                    text,
+                    reply_markup=ikb([[('👉🏻 Go to messages', m.link, 'url')]]),
+                )
+            except errors.PeerIdInvalid:
+                continue
+            except Exception as e:
+                c.logger.info(str(e))
+        return await m.reply_msg('Report sent.', quote=False)
