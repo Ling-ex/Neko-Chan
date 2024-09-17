@@ -6,10 +6,14 @@ CMD_HELP = {}
 
 
 async def init_plugins():
+    """
+    Loads the list of available plugins from the current directory.
+    """
+
     for plugin in load_plugins():
         imported_module = import_module('neko.plugins.' + plugin)
         if (
-            hasattr(imported_module, '__PLUGINS__') and
+            hasattr(imported_module, '__MODULE__') and
             imported_module.__MODULE__
         ):
             imported_module.__MODULE__ = imported_module.__MODULE__
