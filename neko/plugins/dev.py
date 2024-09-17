@@ -27,6 +27,13 @@ from neko.utils import time
 from neko.utils.filters import owner_only
 
 
+async def _restart(chat_id: int, msg_id: int):
+    async with aiofiles.open('pickup.txt', 'w') as wr:
+        await wr.write(f'{chat_id}\n{msg_id}')
+
+    os.execvp(sys.executable, [sys.executable, '-m', 'neko'])
+
+
 def format_exception(
     exp: BaseException, tb: Optional[List[traceback.FrameSummary]] = None,
 ) -> str:
@@ -187,7 +194,7 @@ async def update_repo(c: Client, m: types.Message):
         )
 
 
-@Client.on_callback_query(filters.regex('repo'))
+@Client.on_callback_query(filters.regex('repo') & filters.user(Config.OWNER))
 async def handle_callback_query(_, cb: types.CallbackQuery):
     data = cb.data.split()[1]
     if data == 'update':
@@ -196,12 +203,15 @@ async def handle_callback_query(_, cb: types.CallbackQuery):
             text + '\n\nRestarting server...',
         )
 
-        async with aiofiles.open('pickup.txt', 'w') as wr:
-            await wr.write(f'{msg.chat.id}\n{msg.id}')
-
         await cb.answer()
-        os.execvp(sys.executable, [sys.executable, '-m', 'neko'])
+        await _restart(msg.chat.id, msg.id)
 
     elif data == 'cancel':
         await cb.message.edit_text('Update cancelled!')
         return await cb.answer()
+
+
+@Client.on_message(filters.command('restart') & filters.user(Config.OWNER))
+async def restart_handler(_, m: types.Message):
+    msg = await m.reply_msg('Restarting...')
+    await _restart(msg.chat.id, msg.id)
