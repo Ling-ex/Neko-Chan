@@ -7,6 +7,7 @@ from pyrogram import Client as RawClient
 from pyrogram import errors
 from pyrogram import raw
 
+from . import init_plugins
 from .core.schedule import Scheduler
 from .models import connection
 from config import Config
@@ -41,6 +42,7 @@ class Client(RawClient, Scheduler):
         self.log.info('Starting bot...')
         await super().start()
         self.log.info('---[Bot Started]---')
+        await init_plugins()
         await self.catch_up()
         self.log.info('---[Gaps Restored]---')
         await self.read_pickup()

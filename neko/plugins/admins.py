@@ -10,6 +10,69 @@ from neko.neko import Client
 from neko.utils.func import require_admin
 
 
+__MODULE__ = 'Admins'
+__HELP__ = """
+<b>[Restrict]</b>
+- Ban a Member:
+  <code>/ban {@/id/reply} {reason}</code>
+
+- Delete the replied message and ban its sender:
+  <code>/dban {reply} {reason}</code>
+
+- Ban a Member for specific time:
+  <code>/tban {@/id/reply} {time} {reason}</code>
+
+- Unban a Member:
+  <code>/unban {@ or ID}</code>
+
+- Kick a Member:
+  <code>/kick {@/id/reply}</code>
+
+- Delete the replied message and kick its sender:
+  <code>/dkick {@ or ID}</code>
+
+
+<b>[Mutes]</b>
+- Mute a Member:
+  <code>/mute {@/id/reply} {reason}</code>
+
+- Delete the replied message and mute its sender:
+  <code>/dmute {reply} {reason}</code>
+
+- Mute a Member for specific time:
+  <code>/tmute {@/id/reply} {time} {reason}</code>
+
+- Unmute a Member:
+  <code>/unmute {@ or ID}</code>
+
+
+<b>[Pins]</b>
+- Pin a message:
+  <code>/pin {reply}</code>
+
+- Unpin a message:
+  <code>/unpin {reply}</code>
+
+- Pin the message you wrote:
+  <code>/permapin {text}</code>
+
+- Remove all pinned messages:
+  <code>/unpinall</code> 
+
+
+<b>[Format Time]</b>
+- <b>1m</b> = 1 minute
+- <b>1h</b> = 1 hour
+- <b>1d</b> = 1 day
+
+<b>Example Usage:</b>
+- To restrict a member for 30 minutes:
+  <code>/tmute {@/id/reply} 30m {reason}</code>
+- To restrict a member for 2 hours:
+  <code>/tban {@/id/reply} 2h {reason}</code>
+"""
+
+
 def admins_only():
     async def func(_, c: Client, msg: types.Message | types.CallbackQuery):
         m = msg.message if isinstance(msg, types.CallbackQuery) else msg
