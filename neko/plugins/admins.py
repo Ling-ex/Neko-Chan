@@ -12,64 +12,70 @@ from neko.utils.func import require_admin
 
 __MODULE__ = 'Admins'
 __HELP__ = """
-<b>[Restrict]</b>
-- Ban a Member:
-  <code>/ban {@/id/reply} {reason}</code>
+▎ <b>Restrict</b>
+- <b>Ban a Member:</b>
+  /ban {@/id/reply} {reason}
 
-- Delete the replied message and ban its sender:
-  <code>/dban {reply} {reason}</code>
+- <b>Delete the replied message and ban its sender:</b>
+  /dban {reply} {reason}
 
-- Ban a Member for specific time:
-  <code>/tban {@/id/reply} {time} {reason}</code>
+- <b>Ban a Member for specific time:</b>
+  /tban {@/id/reply} {time} {reason}
 
-- Unban a Member:
-  <code>/unban {@ or ID}</code>
+- <b>Unban a Member:</b>
+  /unban {@ or ID}
 
-- Kick a Member:
-  <code>/kick {@/id/reply}</code>
+- <b>Kick a Member:</b>
+  /kick {@/id/reply}
 
-- Delete the replied message and kick its sender:
-  <code>/dkick {@ or ID}</code>
-
-
-<b>[Mutes]</b>
-- Mute a Member:
-  <code>/mute {@/id/reply} {reason}</code>
-
-- Delete the replied message and mute its sender:
-  <code>/dmute {reply} {reason}</code>
-
-- Mute a Member for specific time:
-  <code>/tmute {@/id/reply} {time} {reason}</code>
-
-- Unmute a Member:
-  <code>/unmute {@ or ID}</code>
+- <b>Delete the replied message and kick its sender:</b>
+  /dkick {@ or ID}
 
 
-<b>[Pins]</b>
+▎ <b>Mutes</b>
+- <b>Mute a Member:</b>
+  /mute {@/id/reply} {reason}
+
+- <b>Delete the replied message and mute its sender:</b>
+  /dmute {reply} {reason}
+
+- <b>Mute a Member for specific time:</b>
+  /tmute {@/id/reply} {time} {reason}
+
+- <b>Unmute a Member:</b>
+  /unmute {@ or ID}
+
+
+▎ <b>Pins</b>
 - Pin a message:
-  <code>/pin {reply}</code>
+  /pin {reply}
 
-- Unpin a message:
-  <code>/unpin {reply}</code>
+- <b>Unpin a message:</b>
+  /unpin {reply}
 
-- Pin the message you wrote:
-  <code>/permapin {text}</code>
+- <b>Pin the message you wrote:</b>
+  /permapin {text}
 
-- Remove all pinned messages:
-  <code>/unpinall</code> 
+- <b>Remove all pinned messages:</b>
+  /unpinall
+
+▎ <b>Misc</b>
+- <b>Report a Message to Admins</b>
+  /report | @admin | @admins
 
 
-<b>[Format Time]</b>
+▎ <b>Format Time</b>
 - <b>1m</b> = 1 minute
 - <b>1h</b> = 1 hour
 - <b>1d</b> = 1 day
 
+<blockquote>
 <b>Example Usage:</b>
-- To restrict a member for 30 minutes:
+- <b>To restrict a member for 30 minutes:</b>
   <code>/tmute {@/id/reply} 30m {reason}</code>
-- To restrict a member for 2 hours:
+- <b>To restrict a member for 2 hours:</b>
   <code>/tban {@/id/reply} 2h {reason}</code>
+</blockquote>
 """
 
 

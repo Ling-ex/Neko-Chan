@@ -5,6 +5,23 @@ from neko.models import members
 from neko.neko import Client
 from neko.utils import func
 
+__MODULE__ = 'Chat Overview'
+__HELP__ = """
+▎ <b>Chat Overview</b>
+- <b>Add a note about group member changes:</b>
+  /add_chat_overview
+
+- <b>Delete a group member change note:</b>
+  /del_chat_overview
+
+▎ <b>Function:</b>
+<b><i>This feature records updates in the group, including:</i></b>
+- Members who join.
+- Members who leave.
+- Members who are banned.
+
+The change note will be displayed every midnight, with a comparison of the number of group members between yesterday and today."""  # noqa: E501
+
 
 @Client.on_message(filters.command('add_chat_overview'))
 @func.require_admin([])
