@@ -50,10 +50,14 @@ async def handle_commands(_, m: types.Message):
         else:
             valid_cmds = list(CMD_HELP.keys())
             if list_suggest := get_suggestions(name, valid_cmds):
+                list_suggest = list(
+                    item.replace('_', ' ')
+                    for item in list_suggest
+                )
                 suggestions = ', '.join(list_suggest)
-                return await m.reply_msg(f'The command "{name}" is invalid! Did you mean: {suggestions}?')  # noqa: E501
+                return await m.reply_msg(f'The command "{name.replace("_", " ")}" is invalid! Did you mean: {suggestions}?')  # noqa: E501
             else:
-                return await m.reply_msg(f'The command "{name}" is invalid and no suggestions are available.')  # noqa: E501
+                return await m.reply_msg(f'The command "{name.replace("_", " ")}" is invalid and no suggestions are available.')  # noqa: E501
 
 
 @Client.on_callback_query(filters.regex(r'help_(.*?)'))
