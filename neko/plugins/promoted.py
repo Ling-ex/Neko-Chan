@@ -9,6 +9,16 @@ from pyrogram.helpers import ikb
 from neko.neko import Client
 from neko.utils import func
 
+__MODULE__ = 'Promoted'
+__HELP__ = """
+▎ <b>Promoting</b>
+- <b>Promote a Member</b>
+    /admin or /promote {@/ID/reply}
+
+- <b>Demote a Member</b>
+    /unadmin or /demote {@/ID/reply}
+"""
+
 
 @Client.on_message(filters.command(['admin', 'promote']))
 @func.require_admin('can_promote_members')

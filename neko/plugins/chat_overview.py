@@ -14,7 +14,7 @@ __HELP__ = """
 - <b>Delete a group member change note:</b>
   /del_chat_overview
 
-▎ <b>Function:</b>
+<b>Function:</b>
 <b><i>This feature records updates in the group, including:</i></b>
 - Members who join.
 - Members who leave.

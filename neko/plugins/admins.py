@@ -47,7 +47,7 @@ __HELP__ = """
 
 
 ▎ <b>Pins</b>
-- Pin a message:
+- <b>Pin a message:</b>
   /pin {reply}
 
 - <b>Unpin a message:</b>
@@ -64,7 +64,7 @@ __HELP__ = """
   /report | @admin | @admins
 
 
-▎ <b>Format Time</b>
+<b>Format Time</b>
 - <b>1m</b> = 1 minute
 - <b>1h</b> = 1 hour
 - <b>1d</b> = 1 day
