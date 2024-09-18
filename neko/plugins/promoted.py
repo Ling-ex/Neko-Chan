@@ -23,6 +23,7 @@ __HELP__ = """
 @Client.on_message(filters.command(['admin', 'promote']))
 @func.require_admin('can_promote_members')
 async def promote_member_handler(c: Client, m: types.Message):
+    user_id: Optional[int | str] = None
     title: Optional[str] = None
 
     if rep := m.reply_to_message:
@@ -33,6 +34,10 @@ async def promote_member_handler(c: Client, m: types.Message):
         user_id = m.text.split()[1] or None
         if len(m.command) > 2:
             title = (m.text or m.caption).split(None, 2)[2]
+    if not user_id:
+        return await m.reply_msg(
+            'User not found.',
+        )
     try:
         await c.resolve_peer(user_id)
     except (
@@ -42,10 +47,6 @@ async def promote_member_handler(c: Client, m: types.Message):
     ):
         return await m.reply_msg(
             "I can't find that user.",
-        )
-    if not user_id:
-        return await m.reply_msg(
-            'User not found.',
         )
     user = await c.get_users(user_id)
     if not (bot := (await m.chat.get_member(c.me.id)).privileges):
