@@ -18,7 +18,7 @@ from neko.utils.misc_bttn import dynamic_buttons
 __MODULE__ = "Notes"
 __HELP__ = """
 ▎<b>Notes</b>
-- <b>Add a note:<b>
+- <b>Add a note:</b>
    /save {key} {text/reply/caption
 
 - <b>Get a note:</b>
