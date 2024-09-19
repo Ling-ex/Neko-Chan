@@ -14,6 +14,7 @@ help_text = '''<b>Need Help?</b>
 Click the button below to see a list of available help!'''
 
 
+# Functions Button Helpers
 async def help_parser(
     m: types.Message,
     text: str,
@@ -34,6 +35,7 @@ async def help_parser(
     )
 
 
+# Handler Command Help
 @Client.on_message(filters.command('help'))
 async def handle_commands(_, m: types.Message):
     chat = m.chat.type
@@ -60,6 +62,7 @@ async def handle_commands(_, m: types.Message):
                 return await m.reply_msg(f'The command "{name.replace("_", " ")}" is invalid and no suggestions are available.')  # noqa: E501
 
 
+# Callbacl Help
 @Client.on_callback_query(filters.regex(r'help_(.*?)'))
 async def cb_helpers_handler(c: Client, cb: types.CallbackQuery):
     mod_match = re.match(r'help_module\((.+?)\)', cb.data)
@@ -113,3 +116,17 @@ async def cb_helpers_handler(c: Client, cb: types.CallbackQuery):
             ),
             disable_web_page_preview=True,
         )
+
+
+# Ping
+@Client.on_message(filters.command('ping'))
+async def ping_handler(_, m: types.Message):
+    from time import time
+    start = time()
+    from pyrogram.raw.functions import Ping
+    await _.invoke(Ping(ping_id=_.rnd_id()))
+    end = time()
+    ping_str = (end - start) * 1000
+    return await m.reply_msg(
+        f'<b>Pong!</b>\n<code>{ping_str:.3f}ms</code>',
+    )
