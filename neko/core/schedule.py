@@ -90,10 +90,6 @@ class Scheduler(Manager):
     async def update_members(self) -> None:
         now = datetime.utcnow() + timedelta(hours=7)
         time = now.strftime('📆 %Y-%m-%d | ⏱ %H:%M:%S')
-        text = (
-            '<i>✅ Group check <b>is complete!</b></i>\n\n'
-            f'<code>{time}</code>\n\n'
-        )
         for chat in await members.get_all():
             try:
                 count = await self.get_chat_members_count(  # type: ignore
@@ -120,7 +116,9 @@ class Scheduler(Manager):
                 react = '<b><i>😐 Hmmm!</i></b>'
                 mark = '<u><b>still the same</b></u>'
 
-            text += (
+            text = (
+                '<i>✅ Group check <b>is complete!</b></i>\n\n'
+                f'<code>{time}</code>\n\n'
                 f'<i>{react}\n'
                 f'The current number of members {mark} compared'
                 f' to yesterday is: <code>{count_db}</code> members</i>\n\n'
