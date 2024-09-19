@@ -27,10 +27,10 @@ __HELP__ = """
 - <b>Delete a note:</b>
   /delnote {key}
 
-- <b>Get all notes by chat:</b>
+- <b>Get all notes in chat:</b>
    /notes
 
-- <b>Delete all notes by chat:</b>
+- <b>Delete all notes in chat:</b>
    /clearall ; only owner
 """
 
