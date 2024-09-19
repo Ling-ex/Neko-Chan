@@ -1,5 +1,8 @@
-[![GitHub license](https://img.shields.io/github/license/Ling-ex/Neko-Chan)](https://github.com/Ling-ex/Neko-Chan/blob/dev/LICENSE)
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/56221f5db8c045428d5aa52911ec5d36)](https://www.codacy.com/gh/Ling-ex/Neko-Chan/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Ling-ex/Neko-Chan&amp;utm_campaign=Badge_Grade)
+![GitHub license](https://img.shields.io/github/license/Ling-ex/Neko-Chan)
+![Codacy Badge](https://app.codacy.com/project/badge/Grade/56221f5db8c045428d5aa52911ec5d36)
+![Repo Size](https://img.shields.io/github/repo-size/Ling-ex/Neko-Chan)
+![Neko-Chan](https://files.catbox.moe/cp57v5.jpg)
+
 
 # About Neko-Chan
 Neko-Chan is built using Python and the Pyrogram library. It currently includes several features for managing groups and is under development for future features.
