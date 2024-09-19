@@ -1,9 +1,12 @@
+import re
 from math import ceil
 from typing import List
+from typing import Optional
 from typing import Tuple
 
 from pyrogram import enums
 from pyrogram.types import InlineKeyboardButton
+from pyrogram.types import InlineKeyboardMarkup
 
 
 class EqInlineKeyboardButton(InlineKeyboardButton):
@@ -87,3 +90,41 @@ def paginate_modules(
         ))
 
     return buttons
+
+
+async def dynamic_buttons(
+    text: str,
+) -> Tuple[Optional[str], Optional[InlineKeyboardMarkup]]:
+    if len(text) == 0:
+        return None, None
+    msg = re.split(r'\[.*?\]\(buttonurl:.*?\)', text)[0].strip()
+    row: List[InlineKeyboardButton] = []
+    keyboard: List[List[InlineKeyboardButton]] = []
+    pattern = r'\[(.*?)\]\(buttonurl:(.*?)\)'
+    for button_name, button_data in re.findall(pattern, text):
+        if button_data.endswith(':same'):
+            row.append(
+                InlineKeyboardButton(
+                    text=button_name,
+                    url=button_data[:-5],
+                ),
+            )
+            keyboard.append(row)
+            row = []
+        else:
+            row.append(
+                InlineKeyboardButton(
+                    text=button_name,
+                    url=button_data,
+                ),
+            )
+        if len(row) > 8:
+            keyboard.append(row)
+            row = []
+    if len(row) > 0:
+        keyboard.append(row)
+    button = InlineKeyboardMarkup(keyboard) if keyboard else None
+    if len(msg) == 0:
+        return None, button
+
+    return msg, button
