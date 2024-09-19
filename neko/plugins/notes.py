@@ -11,7 +11,28 @@ from pyrogram.helpers import ikb
 from neko.models import notes
 from neko.neko import Client
 from neko.utils.filters import owner_chats
+from neko.utils.filters import admins_only
 from neko.utils.misc_bttn import dynamic_buttons
+
+
+__MODULE__ = "Notes"
+__HELP__ = """
+▎<b>Notes</b>
+- <b>Add a note:<b>
+   /save {key} {text/reply/caption
+
+- <b>Get a note:</b>
+   /get {key} or #key
+
+- <b>Delete a note:</b>
+  /delnote {key}
+
+- <b>Get all notes by chat:</b>
+   /notes
+
+- <b>Delete all notes by chat:</b>
+   /clearall ; only owner
+"""
 
 
 def get_media_info(
@@ -66,7 +87,7 @@ def get_message_text(msg: types.Message) -> Optional[str]:
     return None
 
 
-@Client.on_message(filters.command('save'))
+@Client.on_message(filters.command('save') & admins_only)
 async def save_notes_handler(_, m: types.Message):
     if len(m.command) < 2:
         return await m.reply_msg(
@@ -226,7 +247,7 @@ async def get_note_handler(_, m: types.Message):
             )
 
 
-@Client.on_message(filters.command('delnote'))
+@Client.on_message(filters.command('delnote') & admins_only)
 async def delete_note_handler(_, m: types.Message):
     if len(m.command) < 2:
         return await m.reply_msg(
