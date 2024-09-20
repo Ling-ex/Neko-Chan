@@ -66,8 +66,8 @@ async def handle_commands(_, m: types.Message):
 @Client.on_callback_query(filters.regex(r'help_(.*?)'))
 async def cb_helpers_handler(c: Client, cb: types.CallbackQuery):
     mod_match = re.match(r'help_module\((.+?)\)', cb.data)
-    prev_match = re.match(r'help_prev\((.+?)\)', cb.data)
-    next_match = re.match(r'help_next\((.+?)\)', cb.data)
+    prev_match = re.match(r'help_prev\((\d+)\)', cb.data)
+    next_match = re.match(r'help_next\((\d+)\)', cb.data)
     back_match = re.match(r'help_back', cb.data)
     chat = cb.message.chat.type
     if mod_match:
@@ -88,22 +88,22 @@ async def cb_helpers_handler(c: Client, cb: types.CallbackQuery):
             disable_web_page_preview=True,
         )
 
-    if prev_match:
-        curr_page = int(prev_match[1])
+    elif prev_match:
+        page = int(prev_match[1]) - 1
         await cb.message.edit_msg(
             text=help_text,
             reply_markup=types.InlineKeyboardMarkup(
-                paginate_modules(curr_page - 1, CMD_HELP, 'help', chat),
+                paginate_modules(page, CMD_HELP, 'help', chat),
             ),
             disable_web_page_preview=True,
         )
 
     elif next_match:
-        next_page = int(next_match[1])
+        page = int(next_match[1]) + 1
         await cb.message.edit_msg(
             text=help_text,
             reply_markup=types.InlineKeyboardMarkup(
-                paginate_modules(next_page + 1, CMD_HELP, 'help', chat),
+                paginate_modules(page, CMD_HELP, 'help', chat),
             ),
             disable_web_page_preview=True,
         )
@@ -126,7 +126,7 @@ async def ping_handler(_, m: types.Message):
     from pyrogram.raw.functions import Ping
     await _.invoke(Ping(ping_id=_.rnd_id()))
     end = time()
-    ping_str = (end - start) * 1000
+    latency = (end - start) * 1000
     return await m.reply_msg(
-        f'<b>Pong!</b>\n<code>{ping_str:.3f}ms</code>',
+        f'<b>Pong!</b>\n<code>{latency:.3f}ms</code>',
     )
