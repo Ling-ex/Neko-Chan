@@ -270,7 +270,7 @@ async def get_all_noted(_, m: types.Message):
     all_notes: list = await notes.get_all_by_chat(chat.id)
     if not all_notes:
         return await m.reply_msg(
-            f'Notes in empty {chat.title}',
+            f'Notes in the empty {chat.title}',
         )
     text = f'<b>List of notes {chat.title}:</b>\n\n'
     for note in all_notes:
@@ -282,7 +282,7 @@ async def get_all_noted(_, m: types.Message):
 async def delete_all_notes(_, m: types.Message):
     if not await notes.get_all_by_chat(m.chat.id):
         return await m.reply_msg(
-            f'Noted in empty {m.chat.title}',
+            f'Noted in the empty {m.chat.title}',
         )
 
     return await m.reply_msg(

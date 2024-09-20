@@ -26,7 +26,7 @@ async def tag_logger_handler(c: Client, m: types.Message):
                 found = re.findall('@([_0-9a-zA-Z]+)', m.text)
                 try:
                     user = await c.get_users(found[num])
-                    if user == m.from_user.id:
+                    if user.id == m.from_user.id:
                         user = None
                 except Exception:
                     num += 1
