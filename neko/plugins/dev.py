@@ -167,7 +167,14 @@ except ValidationError as e:
 
 @Client.on_message(filters.command('update') & filters.user(Config.OWNER))
 async def update_repo(c: Client, m: types.Message):
-    output = subprocess.check_output(['git', 'pull']).decode('UTF-8')
+    try:
+        output = subprocess.check_output(['git', 'pull']).decode('UTF-8')
+    except Exception as e:
+        if "subprocess.CalledProcessError: Command '['git', 'pull']' returned non-zero exit status 128." in str(e):  # noqa: E501
+            rebase = subprocess.check_output(['git', 'rebase']).decode('UTF-8')
+            msg = await m.reply_msg(rebase)
+            output = subprocess.check_output(['git', 'pull']).decode('UTF-8')
+            await msg.delete()
     if 'Already up to date.' in output:
         return await m.reply_text(output)
 
