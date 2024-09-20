@@ -120,4 +120,26 @@ def format_datetime(text: str) -> Optional[datetime]:
         return None
 
 
+def time_since_last_seen(last_seen_time) -> str:
+    now = datetime.now()
+    time = now - last_seen_time
+
+    seconds = time.total_seconds()
+
+    if seconds < 60:
+        return f"{int(seconds)} second{'s' if seconds != 1 else ''} ago"
+
+    elif seconds < 3600:
+        minutes = int(seconds // 60)
+        return f"{minutes} minute{'s' if minutes != 1 else ''} ago"
+
+    elif seconds < 86400:
+        hours = int(seconds // 3600)
+        return f"{hours} hour{'s' if hours != 1 else ''} ago"
+
+    else:
+        days = int(seconds // 86400)
+        return f"{days} day{'s' if days != 1 else ''} ago"
+
+
 start_time = usec()
