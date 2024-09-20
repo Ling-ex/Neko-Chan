@@ -279,3 +279,140 @@ async def report_admin_handler(c: Client, m: types.Message):
             except Exception as e:
                 c.log.info(f'admin (report): {str(e)}')
         return await m.reply_msg('Report sent.', quote=False)
+
+
+@Client.on_message(filters.command('unbanall'))
+@require_admin('can_promote_members')
+async def unbanall_handler(c: Client, m: types.Message):
+    msg = await m.reply_msg(
+        '<i>Member Un-Banned process....</i>',
+    )
+    try:
+        get_members = m.chat.get_members(filter=enums.ChatMembersFilter.BANNED)
+    except errors.FloodWait as f:
+        await asyncio.sleep(f.value)
+        get_members = m.chat.get_members(filter=enums.ChatMembersFilter.BANNED)
+    done = 0
+    async for member in get_members:
+        user = member.user
+        if user.is_deleted or user.is_bot:
+            continue
+        try:
+            await asyncio.sleep(1)
+            await m.chat.unban_member(user.id)
+            done += 1
+        except errors.FloodWait as f:
+            await asyncio.sleep(f.value)
+            await m.chat.unban_member(user.id)
+            done += 1
+        except Exception as e:
+            c.log.info(e)
+            continue
+    if done == 0:
+        return await msg.edit_msg(
+            'There are no banned users here',
+        )
+    return await msg.edit_msg(
+        'Successfully unlocked all banned on {}.\n\n'
+        '<b>Total Un-Banned:</b> <code>{}</code>'.format(m.chat.title, done),
+    )
+
+
+@Client.on_message(filters.command('unmuteall'))
+@require_admin('can_promote_members')
+async def unmuteall_handler(c: Client, m: types.Message):
+    msg = await m.reply_msg(
+        '<i>Member Un-Restrict process....</i>',
+    )
+    try:
+        get_members = m.chat.get_members(
+            filter=enums.ChatMembersFilter.RESTRICTED,
+        )
+    except errors.FloodWait as f:
+        await asyncio.sleep(f.value)
+        get_members = m.chat.get_members(
+            filter=enums.ChatMembersFilter.RESTRICTED,
+        )
+    done = 0
+    async for member in get_members:
+        user = member.user
+        if user.is_deleted or user.is_bot:
+            continue
+        try:
+            await asyncio.sleep(1)
+            await m.chat.unban_member(user.id)
+            done += 1
+        except errors.FloodWait as f:
+            await asyncio.sleep(f.value)
+            await m.chat.unban_member(user.id)
+            done += 1
+        except Exception as e:
+            c.log.info(e)
+            continue
+
+    if done == 0:
+        return await msg.edit_msg(
+            'There are no user restrictions here',
+        )
+    return await msg.edit_msg(
+        'Successfully unlocked all restricted on {}.\n\n'
+        '<b>Total Un-Restricted:</b> <code>{}</code>'.format(
+            m.chat.title, done,
+        ),
+    )
+
+
+@Client.on_message(filters.command('staff'))
+async def staff_group_handler(c: Client, m: types.Message):
+    chat = m.chat
+    text = f'<b>Staff Group in {chat.title}</b>\n\n'
+
+    try:
+        get_members = chat.get_members(
+            filter=enums.ChatMembersFilter.ADMINISTRATORS,
+        )
+    except errors.FloodWait as f:
+        await asyncio.sleep(f.value)
+        get_members = chat.get_members(
+            filter=enums.ChatMembersFilter.ADMINISTRATORS,
+        )
+
+    founder = '👑 <b>Founder:</b>\n'
+    co_founder = '\n⚜️  <b>Deputy Founder:</b>\n'
+    admins = '\n👮🏼 <b>Admins:</b>\n'
+    co_founder_list = []
+    admins_list = []
+
+    async for staff in get_members:
+        user = staff.user
+        if user.is_bot or user.is_deleted:
+            continue
+        mention = '@' + user.username if user.username else user.mention
+        if staff.status == enums.ChatMemberStatus.OWNER:
+            founder += f' ╰ {mention}\n'
+        else:
+            if staff.privileges.can_promote_members:
+                title = staff.custom_title or None
+                co_founder_list.append(
+                    f' ├ {mention} » <i>{title}</i>' if title else f' ├ {mention}',  # noqa: E501
+                )
+            else:
+                title = staff.custom_title or None
+                admins_list.append(
+                    f' ├ {mention} » <i>{title}</i>' if title else f' ├ {mention}',  # noqa: E501
+                )
+
+    if co_founder_list:
+        co_founder_list[-1] = co_founder_list[-1].replace(' ├', ' ╰')
+        co_founder += '\n'.join(co_founder_list) + '\n'
+    else:
+        co_founder = ''
+
+    if admins_list:
+        admins_list[-1] = admins_list[-1].replace(' ├', ' ╰')
+        admins += '\n'.join(admins_list) + '\n'
+    else:
+        admins = ''
+
+    text += founder + co_founder + admins
+    return await m.reply_msg(text)
