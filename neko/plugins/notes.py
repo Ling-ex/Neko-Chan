@@ -10,12 +10,12 @@ from pyrogram.helpers import ikb
 
 from neko.models import notes
 from neko.neko import Client
-from neko.utils.filters import owner_chats
 from neko.utils.filters import admins_only
+from neko.utils.filters import owner_chats
 from neko.utils.misc_bttn import dynamic_buttons
 
 
-__MODULE__ = "Notes"
+__MODULE__ = 'Notes'
 __HELP__ = """
 ▎<b>Notes</b>
 - <b>Add a note:</b>
