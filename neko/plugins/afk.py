@@ -68,6 +68,7 @@ async def back_to_keyboard(_, m: types.Message):
         )
 
     go_away = time.time_since_last_seen(data.last_seen)
+    await afk.delete(user.id)
     return await m.reply_msg(
         'You are back from being away from the keyboard after'
         f' ({go_away}).',
