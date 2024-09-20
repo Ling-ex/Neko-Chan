@@ -60,12 +60,15 @@ async def delete_chat(chat_id: int) -> bool:
 async def add_user(
     chat_id: int,
     user_id: int,
-    name: str,
+    name: Optional[str],
     status: Role = Role.JOIN,
 ) -> bool:
     exist = await get_user(chat_id, user_id)
     if exist and exist.status == status:
         return False
+
+    if not name:
+        name = 'N/A'
     user = User(
         user_id=user_id,
         name=name,
