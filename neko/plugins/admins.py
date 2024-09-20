@@ -13,7 +13,7 @@ from neko.utils.func import require_admin
 
 __MODULE__ = 'Admins'
 __HELP__ = """
-▎ <b>Restrict</b>
+▎<b>Restrict</b>
 - <b>Ban a Member:</b>
   /ban {@/id/reply} {reason}
 
@@ -33,7 +33,7 @@ __HELP__ = """
   /dkick {@ or ID}
 
 
-▎ <b>Mutes</b>
+▎<b>Mutes</b>
 - <b>Mute a Member:</b>
   /mute {@/id/reply} {reason}
 
@@ -47,7 +47,7 @@ __HELP__ = """
   /unmute {@ or ID}
 
 
-▎ <b>Pins</b>
+▎<b>Pins</b>
 - <b>Pin a message:</b>
   /pin {reply}
 
@@ -60,7 +60,7 @@ __HELP__ = """
 - <b>Remove all pinned messages:</b>
   /unpinall
 
-▎ <b>Misc</b>
+▎<b>Misc</b>
 - <b>Report a Message to Admins</b>
   /report | @admin | @admins
 

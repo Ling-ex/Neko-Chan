@@ -11,7 +11,7 @@ from neko.utils import func
 
 __MODULE__ = 'Promoted'
 __HELP__ = """
-▎ <b>Promoting</b>
+▎<b>Promoting</b>
 - <b>Promote a Member</b>
     /admin or /promote {@/ID/reply}
 

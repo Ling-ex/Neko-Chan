@@ -7,7 +7,7 @@ from neko.utils import func
 
 __MODULE__ = 'Chat Overview'
 __HELP__ = """
-▎ <b>Chat Overview</b>
+▎<b>Chat Overview</b>
 - <b>Add a note about group member changes:</b>
   /add_chat_overview
 

@@ -12,6 +12,34 @@ from neko.utils import time
 from neko.utils.misc_bttn import dynamic_buttons
 
 
+__MODULE__ = 'AFK'
+__HELP__ = """
+▎<b>Away from keyboard</b>
+- <b>Set AFK</b>
+  /afk {reason}
+  <i>Set your status to AFK (Away From Keyboard).</i>
+
+- <b>Stop AFK</b>
+  /noafk
+  <i>Stop being AFK and delete your AFK status.</i>
+
+
+<b>When You Are AFK</b>
+   <i>If someone mentions you or sends you a group chat
+   message while you are AFK:</i>
+       - They will receive an automatic reply indicating
+         that you are AFK.
+       - The reply will include the reason (if provided)
+         and the duration since you went AFK.
+
+<b>When You Return</b>
+   <i>After and using the </i>/noafk<i> command:</i>
+       - Your AFK status will be removed.
+       - You will receive a summary of the messages
+         and chats you missed while you were away.
+"""
+
+
 @Client.on_message(filters.command('afk'))
 async def away_from_keyboard(_, m: types.Message):
     if m.sender_chat:
