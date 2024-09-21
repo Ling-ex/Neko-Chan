@@ -1,4 +1,5 @@
 import difflib
+from types import SimpleNamespace
 from typing import Optional
 
 
@@ -27,3 +28,16 @@ def get_suggestions(
     )
 
     return suggest
+
+
+def dict_to_obj(data_dict):
+    """
+    Converts a dictionary to an object using SimpleNamespace.
+
+    Args:
+        data_dict (dict): The dictionary to be converted to an object.
+
+    Returns:
+        SimpleNamespace: The object returned from the dictionary.
+    """
+    return SimpleNamespace(**data_dict)
