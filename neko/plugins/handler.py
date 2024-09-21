@@ -53,7 +53,7 @@ async def handler_update_member(
 
 
 def anti_spam():
-    def func(_, __, m: types.Message):
+    async def func(_, __, m: types.Message):
         if not await antispam.db.find_one({'chat_id': m.chat.id}):
             return False
         if (
