@@ -4,6 +4,7 @@ on:
   fork:
   push:
   release:
+    types: published
   issue_comment:
     types: created
   watch:
@@ -16,12 +17,9 @@ on:
     types: [opened, pinned, closed, reopened]
 jobs:
   notify:
-    name: Notify
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
+      - uses: actions/checkout@v3
       - name: Notify the commit on Telegram My Group.
         uses: EverythingSuckz/github-telegram-notify@main
         with:
