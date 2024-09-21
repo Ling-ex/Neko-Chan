@@ -179,6 +179,7 @@ except ValidationError as e:
 
 @Client.on_message(filters.command('update') & filters.user(Config.OWNER))
 async def update_repo(c: Client, m: types.Message):
+    output: Optional[str] = None
     try:
         output = subprocess.check_output(['git', 'pull']).decode('UTF-8')
     except Exception as e:
