@@ -52,9 +52,9 @@ async def handler_update_member(
         )
 
 
-def filter_handle():
+def anti_spam():
     def func(_, __, m: types.Message):
-        if m.chat.id != __.config.CHAT_ID:
+        if not await antispam.db.find_one({'chat_id': m.chat.id}):
             return False
         if (
             m.sender_chat
@@ -65,14 +65,14 @@ def filter_handle():
 
         return False
 
-    return filters.create(func, 'FilterHandle')
+    return filters.create(func, 'FilterAntiSpam')
 
 
 @Client.on_message(
     filters.group
     & filters.text
     & ~admins_only
-    & filter_handle(),
+    & anti_spam(),
     group=30,
 )
 async def handle_anti_channel_and_forward(
