@@ -15,7 +15,7 @@ from neko.neko import Client
     & ~filters.bot & ~filters.via_bot
     & filters.text
     & filters.incoming,
-    group=99,
+    group=50,
 )
 async def tag_logger_handler(c: Client, m: types.Message):
     user: types.User = None
