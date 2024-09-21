@@ -55,33 +55,6 @@ def format_duration_us(t_us: int | float) -> str:
     return '%d μs' % t_us  # skipcq: PYL-C0209
 
 
-def format_duration_td(value: timedelta, precision: int = 0) -> str:
-    pieces = []
-
-    if value.days:
-        pieces.append(f'{value.days}d')
-
-    seconds = value.seconds
-
-    if seconds >= 3600:
-        hours = int(seconds / 3600)
-        pieces.append(f'{hours}h')
-        seconds -= hours * 3600
-
-    if seconds >= 60:
-        minutes = int(seconds / 60)
-        pieces.append(f'{minutes}m')
-        seconds -= minutes * 60
-
-    if seconds > 0 or not pieces:
-        pieces.append(f'{seconds}s')
-
-    if precision == 0:
-        return ''.join(pieces)
-
-    return ''.join(pieces[:precision])
-
-
 def format_datetime(text: str) -> Optional[datetime]:
     """
     Calculates a future datetime based on time deltas
@@ -120,7 +93,53 @@ def format_datetime(text: str) -> Optional[datetime]:
         return None
 
 
+def format_duration_td(value: timedelta, precision: int = 0) -> str:
+    """
+    Formats a timedelta object into a human-readable string with specified precision.
+
+    Args:
+        value (timedelta): The duration to format.
+        precision (int): The number of time units to include.
+
+    Returns:
+        str: A string representation of the duration.
+    """  # noqa: E501
+    pieces = []
+
+    if value.days:
+        pieces.append(f'{value.days}d')
+
+    seconds = value.seconds
+
+    if seconds >= 3600:
+        hours = int(seconds / 3600)
+        pieces.append(f'{hours}h')
+        seconds -= hours * 3600
+
+    if seconds >= 60:
+        minutes = int(seconds / 60)
+        pieces.append(f'{minutes}m')
+        seconds -= minutes * 60
+
+    if seconds > 0 or not pieces:
+        pieces.append(f'{seconds}s')
+
+    if precision == 0:
+        return ''.join(pieces)
+
+    return ''.join(pieces[:precision])
+
+
 def time_since_last_seen(last_seen_time) -> str:
+    """
+    Calculates the time since a given datetime and formats it as a human-readable string.
+
+    Args:
+        last_seen_time (datetime): The past datetime to calculate from.
+
+    Returns:
+        str: A string indicating the time elapsed since last_seen_time.
+    """  # noqa: E501
     now = datetime.now()
     time = now - last_seen_time
 

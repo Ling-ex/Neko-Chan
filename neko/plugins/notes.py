@@ -38,6 +38,15 @@ __HELP__ = """
 def get_media_info(
     msg: types.Message,
 ) -> Optional[Tuple[str, str]]:
+    """
+    Extracts media information from a Telegram message.
+
+    Args:
+        msg (types.Message): The message to extract media info from.
+
+    Returns:
+        Optional[Tuple[str, str]]: A tuple containing the file ID and media type if media is present, otherwise None.
+    """  # noqa: E501
     if reply := msg.reply_to_message:
         event = reply
     else:
@@ -70,6 +79,15 @@ def get_media_info(
 
 
 def get_message_text(msg: types.Message) -> Optional[str]:
+    """
+    Extracts text content from a Telegram message or its reply.
+
+    Args:
+        msg (types.Message): The message to extract text from.
+
+    Returns:
+        Optional[str]: The extracted text in HTML format if present, otherwise None.
+    """  # noqa: E501
     if rep := msg.reply_to_message:
         if rep.text:
             return rep.text.html
@@ -137,8 +155,16 @@ async def get_note_handler(_, m: types.Message):
     else:
         text, button = value, None
 
-    user = m.reply_to_message.from_user if m.reply_to_message else m.from_user
-    username = '@' + user.username if user.username else 'N/A'
+    user = (
+        m.reply_to_message.from_user
+        if m.reply_to_message and not m.reply_to_message.sender_chat
+        else m.from_user
+    )
+    username = (
+        '@' + user.username
+        if user.username
+        else 'N/A'
+    )
     _format = {
         'id': user.id,
         'first': user.first_name,

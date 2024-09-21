@@ -41,7 +41,11 @@ async def tag_logger_handler(c: Client, m: types.Message):
     if m.from_user and user.id == m.from_user.id:
         return m.stop_propagation()
     if m.from_user:
-        tag_by = '@' + m.from_user.username if m.from_user.username else m.from_user.mention  # noqa: E501
+        tag_by = (
+            '@' + m.from_user.username
+            if m.from_user.username
+            else m.from_user.mention
+        )
     else:
         tag_by = 'Anon'
     text = f"""

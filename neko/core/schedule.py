@@ -11,39 +11,44 @@ from neko.models import members
 
 class Manager:
     def __init__(self):
+        # Initialize the scheduler with a specific timezone
         self.scheduler = AsyncIOScheduler(timezone='Asia/Jakarta')
 
 
 class Scheduler(Manager):
 
     async def start_sch(self) -> None:
-        # only run at 00:00
+        """
+        Starts the scheduler with specific jobs.
+
+        Schedules tasks to delete accounts and update members at specified times.
+        """  # noqa: E501
+        # Run deleted_account at 00:00
         self.scheduler.add_job(
             self.deleted_account,
             'cron', hour=0, minute=0,
         )
-        # only run at 00:15
+        # Run update_members at 00:15
         self.scheduler.add_job(
             self.update_members,
             'cron', hour=0, minute=15,
         )
-        # run the schedule im asyncIO
+        # Start the scheduler in the asyncio loop
         self.scheduler.start()
 
     async def deleted_account(self) -> None:
+        """
+        Removes deleted accounts from a chat group if the member count is less than 4000.
+        """  # noqa: E501
         CHAT_ID = Config.CHAT_ID
         get_members = None
         try:
             mem = await self.get_chat_members_count(CHAT_ID)  # type: ignore
-            # Only cleans groups with less than 4000 members
-            # Because Telegram's limit is only ~4000 members
             if mem <= 4000:
                 get_members = self.get_chat_members(CHAT_ID)  # type: ignore
         except errors.FloodWait as f:
             await asyncio.sleep(f.value)
             mem = await self.get_chat_members_count(CHAT_ID)  # type: ignore
-            # Only cleans groups with less than 4000 members
-            # Because Telegram's limit is only ~4000 members
             if mem <= 4000:
                 get_members = self.get_chat_members(CHAT_ID)  # type: ignore
         except Exception as er:
@@ -52,6 +57,8 @@ class Scheduler(Manager):
         count = 0
         if not get_members:
             return
+
+        # Iterate over members to find and remove deleted accounts
         async for member in get_members:
             try:
                 if member.user.is_deleted:
@@ -75,12 +82,12 @@ class Scheduler(Manager):
                 continue
             except Exception as e:
                 self.log.error(str(e))  # type: ignore
+
+        # Send a message about the cleanup results
         if count < 1:
-            text = 'This group is clean of murdered members.'
+            text = 'This group is clean of deleted members.'
         else:
-            text = 'Find {} Member killed and get rid of him/her.'.format(
-                count,
-            )
+            text = f'Found {count} deleted members and removed them.'
 
         await self.send_message(  # type: ignore
             CHAT_ID,
@@ -88,6 +95,12 @@ class Scheduler(Manager):
         )
 
     async def update_members(self) -> None:
+        """
+        Updates and reports the change in member count for each chat.
+
+        Compares current member counts with stored counts and reports increases, decreases,
+        and other member status changes such as new joins, leaves, and bans.
+        """  # noqa: E501
         now = datetime.utcnow() + timedelta(hours=7)
         time = now.strftime('📆 %Y-%m-%d | ⏱ %H:%M:%S')
         for chat in await members.get_all():

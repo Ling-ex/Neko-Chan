@@ -22,14 +22,21 @@ async def handler_update_member(
                 user.user.full_name,
                 members.Role.RESTRICTED,
             )
-        if event.from_user.id == user.user.id and not event.new_chat_member:
+        if (
+            event.from_user.id == user.user.id
+            and not event.new_chat_member
+        ):
             return await members.add_user(
                 event.chat.id,
                 user.user.id,
                 user.user.full_name,
                 members.Role.LEAVE,
             )
-    if event and (user := event.new_chat_member) and not event.old_chat_member:
+    if (
+        event
+        and (user := event.new_chat_member)
+        and not event.old_chat_member
+    ):
         return await members.add_user(
             event.chat.id,
             user.user.id,

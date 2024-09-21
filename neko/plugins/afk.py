@@ -126,7 +126,11 @@ async def go_afk_handler(_, m: types.Message) -> None:
     go_away = time.time_since_last_seen(data.last_seen)
     text += f'    <b>Last Seen:</b> <code>{go_away}</code>\n'
     if reason := data.reason:
-        username = '@' + user.username if user.username else 'No Username'
+        username = (
+            '@' + user.username
+            if user.username
+            else 'N/A'
+        )
         msg, button = await dynamic_buttons(reason)
         if msg:
             reason = msg.format(

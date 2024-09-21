@@ -54,12 +54,17 @@ async def check_perms(
             ),
         )
         return False
-    if not permissions and user.status == enums.ChatMemberStatus.ADMINISTRATOR:
+    if (
+        not permissions
+        and user.status == enums.ChatMemberStatus.ADMINISTRATOR
+    ):
         return True
     missing_perms = [
         permission
         for permission in (
-            [permissions] if isinstance(permissions, str) else permissions
+            [permissions]
+            if isinstance(permissions, str)
+            else permissions
         )
         if not getattr(user.privileges, permission)
     ]

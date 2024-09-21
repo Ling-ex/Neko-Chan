@@ -387,7 +387,11 @@ async def staff_group_handler(c: Client, m: types.Message):
         user = staff.user
         if user.is_bot or user.is_deleted:
             continue
-        mention = '@' + user.username if user.username else user.mention
+        mention = (
+            '@' + user.username
+            if user.username
+            else user.mention
+        )
         if staff.status == enums.ChatMemberStatus.OWNER:
             founder += f' ╰ {mention}\n'
         else:

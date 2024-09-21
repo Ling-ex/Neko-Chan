@@ -14,17 +14,15 @@ class Role(str, Enum):
     LEAVE = 'LEAVE'
     RESTRICTED = 'RESTRICTED'
 
+
 # Model for User
-
-
 class User(BaseModel):
     user_id: int
     name: str
     status: Role = Role.JOIN
 
+
 # Model for Member
-
-
 class Member(BaseModel):
     chat_id: int
     chat_count: int = Field(default=0)
@@ -32,16 +30,35 @@ class Member(BaseModel):
 
 
 async def get_chat(chat_id: int) -> Optional[Member]:
-    document = await db.inspections.find_one(
+    """
+    Retrieves a Member object based on the chat_id.
+
+    Args:
+        chat_id (int): The ID of the chat.
+
+    Returns:
+        Optional[Member]: A Member object if found, otherwise None.
+    """
+
+    if document := await db.inspections.find_one(
         {'chat_id': chat_id},
-    )
-    if document:
+    ):
         return Member(**document)
 
     return None
 
 
 async def add_chat(chat_id: int, count: int) -> bool:
+    """
+    Adds or updates the chat count for a specific chat.
+
+    Args:
+        chat_id (int): The ID of the chat.
+        count (int): The new chat count.
+
+    Returns:
+        bool: True if the operation was successful, False otherwise.
+    """
     result = await db.inspections.update_one(
         {'chat_id': chat_id},
         {'$set': {'chat_count': count}},
@@ -51,6 +68,15 @@ async def add_chat(chat_id: int, count: int) -> bool:
 
 
 async def delete_chat(chat_id: int) -> bool:
+    """
+    Deletes a chat entry based on the chat_id.
+
+    Args:
+        chat_id (int): The ID of the chat to delete.
+
+    Returns:
+        bool: True if the deletion was successful, False otherwise.
+    """
     result = await db.inspections.delete_one(
         {'chat_id': chat_id},
     )
@@ -63,6 +89,18 @@ async def add_user(
     name: Optional[str],
     status: Role = Role.JOIN,
 ) -> bool:
+    """
+    Adds a user to a specific chat.
+
+    Args:
+        chat_id (int): The ID of the chat.
+        user_id (int): The ID of the user to add.
+        name (Optional[str]): The name of the user.
+        status (Role): The status of the user.
+
+    Returns:
+        bool: True if the user was added or updated, False if already exists with the same status.
+    """  # noqa: E501
     exist = await get_user(chat_id, user_id)
     if exist and exist.status == status:
         return False
@@ -83,6 +121,16 @@ async def add_user(
 
 
 async def delete_user(chat_id: int, user_id: int) -> bool:
+    """
+    Deletes a user from a specific chat.
+
+    Args:
+        chat_id (int): The ID of the chat.
+        user_id (int): The ID of the user to delete.
+
+    Returns:
+        bool: True if the user was deleted, False otherwise.
+    """
     result = await db.inspections.update_one(
         {'chat_id': chat_id},
         {'$pull': {'users': {'user_id': user_id}}},
@@ -91,6 +139,16 @@ async def delete_user(chat_id: int, user_id: int) -> bool:
 
 
 async def get_user(chat_id: int, user_id: int) -> Optional[User]:
+    """
+    Retrieves a user from a specific chat based on user_id.
+
+    Args:
+        chat_id (int): The ID of the chat.
+        user_id (int): The ID of the user to retrieve.
+
+    Returns:
+        Optional[User]: A User object if found, otherwise None.
+    """
     document = await db.inspections.find_one(
         {
             'chat_id': chat_id,
@@ -105,6 +163,12 @@ async def get_user(chat_id: int, user_id: int) -> Optional[User]:
 
 
 async def get_all() -> List[Member]:
+    """
+    Retrieves all chat members.
+
+    Returns:
+        List[Member]: A list of Member objects.
+    """
     data: List[Member] = []
     async for chat in db.inspections.find():
         data.append(Member(**chat))

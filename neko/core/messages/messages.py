@@ -14,6 +14,18 @@ async def reply_text(
     *args,
     **kwargs: typing.Any,
 ) -> 'Message':
+    """
+    Sends a reply to a message with specified text.
+
+    Args:
+        text (str): The text to send in the reply.
+        quote (bool): Whether to quote the original message.
+        *args: Additional positional arguments.
+        **kwargs: Additional keyword arguments.
+
+    Returns:
+        Message: The sent message object.
+    """
     try:
         msg = await self.reply_text(
             text=text,
@@ -45,6 +57,17 @@ async def reply_text(
 async def edit_text(
     self: Message, text: str, *args, **kwargs: typing.Any,
 ) -> 'Message':
+    """
+    Edits the text of a message.
+
+    Args:
+        text (str): The new text to set for the message.
+        *args: Additional positional arguments.
+        **kwargs: Additional keyword arguments.
+
+    Returns:
+        Message: The edited message object.
+    """
     try:
         msg = await self.edit_text(
             text=text, *args, **kwargs,
@@ -65,6 +88,15 @@ async def edit_text(
 async def delete(
     self: Message, revoke: bool = True,
 ) -> bool:
+    """
+    Deletes a message.
+
+    Args:
+        revoke (bool): Whether to revoke the message for all participants.
+
+    Returns:
+        bool: True if the message was deleted, False otherwise.
+    """
     try:
         msg = await self.delete(revoke=revoke)
         return bool(msg)
@@ -77,6 +109,12 @@ async def delete(
 
 @property  # type: ignore
 def date(self: Message) -> datetime:
+    """
+    Gets the date of the message adjusted by a timezone offset.
+
+    Returns:
+        datetime: The adjusted date and time of the message.
+    """
     return self.date + timedelta(hours=7)
 
 

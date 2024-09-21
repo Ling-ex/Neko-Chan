@@ -10,17 +10,31 @@ from neko.utils.misc import get_suggestions
 from neko.utils.misc_bttn import paginate_modules
 
 
+# Text helpers
 help_text = '''<b>Need Help?</b>
 Click the button below to see a list of available help!'''
 
 
 # Functions Button Helpers
+
 async def help_parser(
     m: types.Message,
     text: str,
     chat: enums.ChatType,
     keyboard: types.InlineKeyboardMarkup = None,
 ):
+    """
+    Parses and sends a help message with an optional inline keyboard.
+
+    Args:
+        m (types.Message): The message or callback query to respond to.
+        text (str): The help text to be sent.
+        chat (enums.ChatType): The type of chat where the message is sent.
+        keyboard (types.InlineKeyboardMarkup, optional): Inline keyboard markup for pagination. Defaults to None.
+
+    Returns:
+        The result of the message sending or editing method, based on whether the input is a message or callback query.
+    """  # noqa: E501
     if not keyboard:
         keyboard = types.InlineKeyboardMarkup(
             paginate_modules(

@@ -28,6 +28,18 @@ from neko.utils.filters import owner_only
 
 
 async def _restart(chat_id: int, msg_id: int):
+    """
+    Asynchronously restarts the application with updated chat and message IDs.
+
+    This function writes the provided chat_id and msg_id to a file named 'pickup.txt',
+    then restarts the current Python process with the module 'neko'.
+
+    Args:
+        chat_id (int): The ID of the chat to be recorded.
+        msg_id (int): The ID of the message to be recorded.
+
+    Restart the program
+    """  # noqa: E501
     async with aiofiles.open('pickup.txt', 'w') as wr:
         await wr.write(f'{chat_id}\n{msg_id}')
 
@@ -205,7 +217,11 @@ async def update_repo(c: Client, m: types.Message):
 async def handle_callback_query(_, cb: types.CallbackQuery):
     data = cb.data.split()[1]
     if data == 'update':
-        text = cb.message.text.html if cb.message.text else cb.message.caption
+        text = (
+            cb.message.text.html
+            if cb.message.text
+            else cb.message.caption
+        )
         msg = await cb.message.edit_text(
             text + '\n\nRestarting server...',
         )

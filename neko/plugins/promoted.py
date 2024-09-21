@@ -86,8 +86,15 @@ async def promote_member_handler(c: Client, m: types.Message):
     except errors.RPCError as e:
         return await m.reply_msg(str(e))
 
-    mention = '@' + member.user.username if member.user.username else member.user.mention  # noqa: E501
-    text = f'{mention} [ <code>{member.user.id}</code> ] has become 👮🏻‍♂️ Admin.\n'  # noqa: E501
+    mention = (
+        '@' + member.user.username
+        if member.user.username
+        else member.user.mention
+    )
+    text = (
+        f'{mention} [ <code>{member.user.id}</code> ]'
+        ' has become 👮🏻‍♂️ Admin.\n'
+    )
     if title:
         await c.set_administrator_title(
             chat_id=m.chat.id,
@@ -97,11 +104,22 @@ async def promote_member_handler(c: Client, m: types.Message):
         text += f'• <b>Title:</b> {title}'
     return await m.reply_msg(
         text=text,
-        reply_markup=ikb([[('🕹 Licensing', f'_promote {member.user.id}')]]),
+        reply_markup=ikb(
+            [[('🕹 Licensing', f'_promote {member.user.id}')]],
+        ),
     )
 
 
 async def privileges_buttons(user_id: int):
+    """
+    Creates inline keyboard buttons for managing user privileges.
+
+    Args:
+        user_id (int): The ID of the user whose privileges are being modified.
+
+    Returns:
+        InlineKeyboardMarkup: An inline keyboard markup with buttons for toggling privileges and saving changes.
+    """  # noqa: E501
     privileges = user_privileges.get(user_id)
     buttons = []
     for name, value in privileges.items():  # type: ignore
@@ -249,7 +267,11 @@ async def demote_member_handler(
             can_manage_video_chats=False,
         ),
     )
-    mention = '@' + user.username if user.username else user.mention
+    mention = (
+        '@' + user.username
+        if user.username
+        else user.mention
+    )
     text = f"""
 {mention} [ <code>{user.id}</code> ] removed from 👮🏻‍♂️ Admin."""
 
