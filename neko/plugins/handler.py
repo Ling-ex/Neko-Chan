@@ -6,7 +6,8 @@ from pyrogram import errors
 from pyrogram import filters
 from pyrogram import types
 
-from neko.enums.antispam_type import AntiSpamType
+from neko.enums import AntiSpamType
+from neko.enums import MemberStatus
 from neko.models import antispam
 from neko.models import members
 from neko.neko import Client
@@ -28,7 +29,7 @@ async def handler_update_member(
                 event.chat.id,
                 user.user.id,
                 user.user.full_name,
-                members.Role.RESTRICTED,
+                MemberStatus.Restricted,
             )
         if (
             event.from_user.id == user.user.id
@@ -38,7 +39,7 @@ async def handler_update_member(
                 event.chat.id,
                 user.user.id,
                 user.user.full_name,
-                members.Role.LEAVE,
+                MemberStatus.Left,
             )
     if (
         event
@@ -49,6 +50,7 @@ async def handler_update_member(
             event.chat.id,
             user.user.id,
             user.user.full_name,
+            MemberStatus.Join,
         )
 
 

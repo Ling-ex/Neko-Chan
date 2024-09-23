@@ -1,4 +1,3 @@
-from enum import Enum
 from typing import List
 from typing import Optional
 
@@ -6,20 +5,14 @@ from pydantic import BaseModel
 from pydantic import Field
 
 from . import data as db
-
-
-# Enum for Role Updates
-class Role(str, Enum):
-    JOIN = 'JOIN'
-    LEAVE = 'LEAVE'
-    RESTRICTED = 'RESTRICTED'
+from neko.enums import MemberStatus
 
 
 # Model for User
 class User(BaseModel):
     user_id: int
     name: str
-    status: Role = Role.JOIN
+    status: MemberStatus = MemberStatus.Join
 
 
 # Model for Member
@@ -87,7 +80,7 @@ async def add_user(
     chat_id: int,
     user_id: int,
     name: Optional[str],
-    status: Role = Role.JOIN,
+    status: MemberStatus = MemberStatus.Join,
 ) -> bool:
     """
     Adds a user to a specific chat.
