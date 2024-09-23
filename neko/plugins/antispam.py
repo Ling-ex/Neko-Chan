@@ -1,4 +1,5 @@
 import contextlib
+from typing import Union
 
 from pyrogram import errors
 from pyrogram import filters
@@ -16,8 +17,12 @@ from neko.utils.filters import admins_only
     & admins_only
     & ~filters.private,
 )
-async def anti_spam_handler(_, m: types.Message):
-    return await m.reply_msg(
+@Client.on_callback_query(filters.regex(r'^bck_antispam') & admins_only)
+async def anti_spam_handler(_, m: Union[types.Message, types.CallbackQuery]):
+    method = m.message.edit_msg if isinstance(
+        m, types.CallbackQuery,
+    ) else m.reply_msg
+    return await method(
         'Select which Action you want to select below.',
         reply_markup=ikb(
             [
@@ -47,12 +52,21 @@ async def cb_antispam_handler(_, cb: types.CallbackQuery):
         type = AntiSpamType.AntiForward
 
     text = f'<b>Set Action for Anti-{action.title()}</b>\n\n'
-    status = (what == 'yes')
-    await antispam.create(
-        cb.message.chat.id,
-        type,
-        status,
-    )
+    data = await antispam.get(cb.message.chat.id, type)
+    if (
+        what
+        and what == '0'
+        and data
+        and (status := data.status)
+    ):
+        status = status
+    else:
+        status = (what == 'yes')
+        await antispam.create(
+            cb.message.chat.id,
+            type,
+            status,
+        )
     text += f'<b>Status:</b> <code>{status}</code>'
     icon = '✅ Active' if status else '❌ Not active'
     what = 'yes' if not status else 'no'
@@ -65,7 +79,7 @@ async def cb_antispam_handler(_, cb: types.CallbackQuery):
                         (icon, f'antispam {action}|{what}'),
                     ],
                     [
-                        ('Cancel', 'antispam cancel|0'),
+                        ('🔙 Back', 'bck_antispam'),
                     ],
                 ],
             ),

@@ -62,7 +62,7 @@ async def create(
     data_obj.type = chat_status.type.name
 
     return await db.update_one(
-        {'chat_id': chat_id},
+        {'chat_id': chat_id, 'type': data_obj.type},
         {'$set': vars(data_obj)},
         upsert=True,
     )
