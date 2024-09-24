@@ -33,7 +33,7 @@ async def create(
     name: str,
     value: Optional[str],
     media: Optional[str] = None,
-    type: Optional[str] = None,
+    note_type: Optional[str] = None,
 ) -> bool:
     """
     Creates or updates a note in the database.
@@ -43,7 +43,7 @@ async def create(
         name (str): The name of the note.
         value (Optional[str]): The content of the note.
         media (Optional[str]): Media associated with the note (optional).
-        type (Optional[str]): The type of the note (optional).
+        note_type (Optional[str]): The type of the note (optional).
 
     Returns:
         bool: True if the operation was successful, False otherwise.
@@ -53,7 +53,7 @@ async def create(
         name=name,
         value=value,
         media=media,
-        type=type,
+        type=note_type,
     )
     return await db.update_one(
         {'chat_id': chat_id, 'name': name},

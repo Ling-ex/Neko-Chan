@@ -117,16 +117,16 @@ async def save_notes_handler(_, m: types.Message):
     media_info = get_media_info(m)
 
     if media_info is not None:
-        file_id, type = media_info
+        file_id, note_type = media_info
     else:
-        file_id, type = None, 'text'
+        file_id, note_type = None, 'text'
 
     await notes.create(
         m.chat.id,
         name,
         value,
         file_id,
-        type,
+        note_type,
     )
     return await m.reply_msg(
         f'Note {name} saved.',
@@ -149,7 +149,7 @@ async def get_note_handler(_, m: types.Message):
         return
     value = data.value
     media = data.media
-    type = data.type
+    note_type = data.type
     if value and re.findall(r'\[(.*?)\]\(buttonurl:(.*?)\)', value.lower()):
         text, button = await dynamic_buttons(value)
     else:
@@ -179,7 +179,7 @@ async def get_note_handler(_, m: types.Message):
             text = text.format(**_format)
         except KeyError:
             text = text
-    if type == 'text':
+    if note_type == 'text':
         try:
             await m.reply_msg(
                 text,
@@ -191,7 +191,7 @@ async def get_note_handler(_, m: types.Message):
                 value,
                 disable_web_page_preview=True,
             )
-    elif type == 'photo':
+    elif note_type == 'photo':
         try:
             await m.reply_photo(
                 media,
@@ -203,7 +203,7 @@ async def get_note_handler(_, m: types.Message):
                 media,
                 caption=value,
             )
-    elif type == 'video':
+    elif note_type == 'video':
         try:
             await m.reply_video(
                 media,
@@ -215,11 +215,11 @@ async def get_note_handler(_, m: types.Message):
                 media,
                 caption=value,
             )
-    elif type == 'sticker':
+    elif note_type == 'sticker':
         return await m.reply_sticker(
             media,
         )
-    elif type == 'animation':
+    elif note_type == 'animation':
         try:
             await m.reply_animation(
                 media,
@@ -231,7 +231,7 @@ async def get_note_handler(_, m: types.Message):
                 media,
                 caption=value,
             )
-    elif type == 'document':
+    elif note_type == 'document':
         try:
             await m.reply_document(
                 media,
@@ -243,7 +243,7 @@ async def get_note_handler(_, m: types.Message):
                 media,
                 caption=value,
             )
-    elif type == 'voice':
+    elif note_type == 'voice':
         try:
             await m.reply_voice(
                 media,
@@ -255,11 +255,11 @@ async def get_note_handler(_, m: types.Message):
                 media,
                 caption=value,
             )
-    elif type == 'video note':
+    elif note_type == 'video note':
         return await m.reply_video_note(
             media,
         )
-    elif type == 'audio':
+    elif note_type == 'audio':
         try:
             return await m.reply_audio(
                 media,
@@ -300,7 +300,7 @@ async def get_all_noted(_, m: types.Message):
         )
     text = f'<b>List of notes {chat.title}:</b>\n\n'
     for note in all_notes:
-        text += f'• <code>{note.name}<code> | ({note.type})\n'
+        text += f'• <code>{note.name}</code> | ({note.type})\n'
     return await m.reply_msg(text)
 
 
