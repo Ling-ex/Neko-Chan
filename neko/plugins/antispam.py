@@ -47,12 +47,12 @@ async def cb_antispam_handler(_, cb: types.CallbackQuery):
             'The action was successfully cancelled.',
         )
     elif action == 'channel':
-        type = AntiSpamType.AntiChannel
+        spam_type = AntiSpamType.AntiChannel
     elif action == 'forward':
-        type = AntiSpamType.AntiForward
+        spam_type = AntiSpamType.AntiForward
 
     text = f'<b>Set Action for Anti-{action.title()}</b>\n\n'
-    data = await antispam.get(cb.message.chat.id, type)
+    data = await antispam.get(cb.message.chat.id, spam_type)
     if (
         what
         and what == '0'
@@ -64,7 +64,7 @@ async def cb_antispam_handler(_, cb: types.CallbackQuery):
         status = (what == 'yes')
         await antispam.create(
             cb.message.chat.id,
-            type,
+            spam_type,
             status,
         )
     text += f'<b>Status:</b> <code>{status}</code>'

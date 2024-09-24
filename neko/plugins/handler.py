@@ -89,14 +89,14 @@ async def handle_anti_channel_and_forward(
 
     linked_chat = chat.linked_chat.id
 
-    type = AntiSpamType
+    spam_type = AntiSpamType
     # Handle anti channel
     if (
         m.sender_chat
         and m.sender_chat.id != m.chat.id
         and m.sender_chat.id != linked_chat
     ):
-        if data := await antispam.get(m.chat.id, type.AntiChannel):
+        if data := await antispam.get(m.chat.id, spam_type.AntiChannel):
             if data.status:
                 return await m.delete_msg()
 
@@ -111,7 +111,7 @@ async def handle_anti_channel_and_forward(
             and m.forward_from_chat.id != linked_chat
         )
     ):
-        if data := await antispam.get(m.chat.id, type.AntiForward):
+        if data := await antispam.get(m.chat.id, spam_type.AntiForward):
             if data.status:
                 return await m.delete_msg()
 

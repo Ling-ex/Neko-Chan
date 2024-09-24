@@ -15,18 +15,18 @@ class ChatStatus(BaseModel):
     status: bool
 
 
-async def get(chat_id: int, type: AntiSpamType) -> Optional[ChatStatus]:
+async def get(chat_id: int, spam_type: AntiSpamType) -> Optional[ChatStatus]:
     """
     Retrieves the chat status based on the provided chat_id.
 
     Args:
         chat_id (int): The ID of the chat whose status is to be retrieved.
-        type (AntiSpamType): The type of anti-spam.
+        spam_type (AntiSpamType): The type of anti-spam.
 
     Returns:
         Optional[ChatStatus]: A ChatStatus object if found, or None if not found.
     """  # noqa: E501
-    data_entry = await db.find_one({'chat_id': chat_id, 'type': type.name})
+    data_entry = await db.find_one({'chat_id': chat_id, 'type': spam_type.name})  # noqa: E501
     if data_entry:
         data_obj = dict_to_obj(data_entry)
         data_obj.type = AntiSpamType[data_obj.type]
@@ -37,7 +37,7 @@ async def get(chat_id: int, type: AntiSpamType) -> Optional[ChatStatus]:
 
 async def create(
     chat_id: int,
-    type: AntiSpamType,
+    spam_type: AntiSpamType,
     status: bool = True,
 ) -> bool:
     """
@@ -45,15 +45,15 @@ async def create(
 
     Args:
         chat_id (int): The ID of the chat to be created or updated.
+        spam_type (AntiSpamType): The type of anti-spam.
         status (bool): The status of the chat (True or False).
-        type (AntiSpamType): The type of anti-spam.
 
     Returns:
         bool: True if the operation was successful, False otherwise.
     """
     chat_status = ChatStatus(
         chat_id=chat_id,
-        type=type,
+        type=spam_type,
         status=status,
     )
 
@@ -68,18 +68,18 @@ async def create(
     )
 
 
-async def delete(chat_id: int, type: AntiSpamType) -> bool:
+async def delete(chat_id: int, spam_type: AntiSpamType) -> bool:
     """
     Deletes the chat status from the database based on the provided chat_id and type.
 
     Args:
         chat_id (int): The ID of the chat to be deleted.
-        type (AntiSpamType): The type of anti-spam to be deleted.
+        spam_type (AntiSpamType): The type of anti-spam to be deleted.
 
     Returns:
         bool: True if the operation was successful, False otherwise.
     """  # noqa: E501
     return await db.delete_one({
         'chat_id': chat_id,
-        'type': type.name,
+        'type': spam_type.name,
     })
