@@ -6,7 +6,6 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pyrogram import errors
 
 from config import Config
-from neko.enums import MemberStatus
 from neko.models import members
 
 
@@ -141,11 +140,11 @@ class Scheduler(Manager):
             leaving_members = []
             banned_members = []
             for user in chat.users:
-                if user.status == MemberStatus.Left:
+                if user.status == 'left':
                     leaving_members.append(user)
-                elif user.status == MemberStatus.Restricted:
+                elif user.status == 'restricted':
                     banned_members.append(user)
-                elif user.status == MemberStatus.Join:
+                elif user.status == 'join':
                     joined_members.append(user)
                 await members.delete_user(chat.chat_id, user.user_id)
 

@@ -12,7 +12,7 @@ from neko.enums import MemberStatus
 class User(BaseModel):
     user_id: int
     name: str
-    status: MemberStatus = MemberStatus.Join
+    status: str
 
 
 # Model for Member
@@ -95,7 +95,7 @@ async def add_user(
         bool: True if the user was added or updated, False if already exists with the same status.
     """  # noqa: E501
     exist = await get_user(chat_id, user_id)
-    if exist and exist.status == status:
+    if exist and exist.status == status.value:
         return False
 
     if not name:
@@ -103,7 +103,7 @@ async def add_user(
     user = User(
         user_id=user_id,
         name=name,
-        status=status,
+        status=status.value,
     )
     result = await db.inspections.update_one(
         {'chat_id': chat_id},
