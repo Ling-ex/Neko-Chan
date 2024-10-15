@@ -16,9 +16,10 @@ class Settings(BaseSettings):
     MONGO_URL: str
 
     # Some Configuration
-    OWNER: int = 5050907047
+    OWNER: int = 1983980399
     CHAT_ID: int = 0
-    REPO_URL: str = 'https://github.com/Ling-ex/Neko-Chan'
+    CHAT_LOG: int = -1002489494471
+    REPO_URL: str = 'https://github.com/lunaticsm/Neko-Chan'
     REPO_BRANCH: str = 'dev'
 
 
