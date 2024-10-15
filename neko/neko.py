@@ -49,6 +49,9 @@ class Client(RawClient, Scheduler):
         await self.start_sch()
 
     async def stop(self, block: bool = False) -> None:
+        if not self.is_connected:
+            self.log.warning('Client has not been started yet. Skipping stop.')
+            return
         self.log.info('---[Saving state...]---')
         db = self.db.bot_settings
         state = await self.invoke(raw.functions.updates.GetState())
@@ -59,9 +62,7 @@ class Client(RawClient, Scheduler):
         }
         await db.update_one(
             {'name': 'state'},
-            {
-                '$set': {'value': value},
-            },
+            {'$set': {'value': value}},
             upsert=True,
         )
         await super().stop(block=block)
