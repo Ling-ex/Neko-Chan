@@ -1,18 +1,24 @@
-from .neko import Client
 
+import asyncio
+from neko import get_client
 
 try:
     import uvloop
+    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 except ImportError:
-    pass
-else:
-    uvloop.install()
+    asyncio.set_event_loop_policy(asyncio.DefaultEventLoopPolicy())
 
-if __name__ == '__main__':
+async def main():
+    Client = get_client()
     bot = Client()
     try:
-        bot.run()
+        await bot.start()
+        await asyncio.Event().wait()
     except KeyboardInterrupt:
         pass
     finally:
-        bot.loop.stop()
+        if bot.is_connected:
+            await bot.stop()
+
+if __name__ == '__main__':
+    asyncio.run(main())

@@ -1,255 +1,161 @@
 import asyncio
 from datetime import timedelta as td
-
-from pyrogram import errors
-from pyrogram import filters
-from pyrogram import types
+from pyrogram import errors, filters, types
+from pyrogram.enums import ChatMemberStatus
 from pyrogram.helpers import ikb
-
 from neko.neko import Client
-from neko.utils import func
-from neko.utils import time
+from neko.utils import func, time
+from config import Config
 
-
-@Client.on_message(filters.command(['kick', 'dkick']) & ~filters.private)
-@func.require_admin('can_restrict_members')
-async def kicked_member_handler(c: Client, m: types.Message):
-    command = m.command[0]
-    lol = f"I can't {command} myself."
-    no_user = "I can't find that user."
-    user_id, reason = await func.user_and_reason(m)
-    if not user_id:
-        return await m.reply_msg(no_user)
-    if user_id == c.me.id:
-        return await m.reply_msg(lol)
-
-    if command == 'dkick' and (rep := m.reply_to_message):
-        await asyncio.gather(
-            rep.delete(),
-            m.delete(),
-        )
+async def ensure_user_known(c: Client, chat_id: int, user_id: int):
     try:
-        await m.chat.ban_member(user_id)
-        await asyncio.sleep(0.5)
-        await m.chat.unban_member(user_id)
-    except errors.UserAdminInvalid:
-        return await m.reply_msg(
-            (
-                'The action requires admin privileges. '
-                'Probably you tried to edit admin privileges '
-                "on someone you don't have rights to"
-            ),
-        )
-    except errors.UserAdminInvalid:
-        return await m.chat.leave()
-    except errors.RPCError as e:
+        member = await c.get_chat_member(chat_id, user_id)
+        return member
+    except errors.UserNotParticipant:
+        raise ValueError(f"User {user_id} is not in the chat.")
+    except errors.PeerIdInvalid:
+        raise ValueError(f"User ID {user_id} is not valid.")
+
+async def check_bot_permissions(c: Client, chat_id: int):
+    bot_member = await c.get_chat_member(chat_id, 'me')
+    if bot_member.status not in [ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER]:
+        raise PermissionError("I'm not an admin or owner in this chat.")
+    if bot_member.privileges and not bot_member.privileges.can_restrict_members:
+        raise PermissionError("I don't have permission to restrict members.")
+
+async def check_target_admin(c: Client, chat_id: int, user_id: int):
+    target_member = await c.get_chat_member(chat_id, user_id)
+    if target_member.status in [ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.OWNER]:
+        raise PermissionError("I can't kick, ban, or mute an admin or owner.")
+
+async def get_group_permissions(chat: types.Chat):
+    return chat.permissions or types.ChatPermissions()
+
+@Client.on_message(filters.command(['kick']) & ~filters.private)
+@func.require_admin('can_restrict_members')
+async def kick_member_handler(c: Client, m: types.Message):
+    user_id, reason = await func.user_and_reason(m)
+    try:
+        await ensure_user_known(c, m.chat.id, int(user_id))
+        await check_bot_permissions(c, m.chat.id)
+        await check_target_admin(c, m.chat.id, int(user_id))
+        user = await c.get_users(int(user_id))
+    except (ValueError, PermissionError) as e:
         return await m.reply_msg(str(e))
-    action_by = 'Anon' if not m.from_user else m.from_user.mention
-    user = await c.get_users(user_id)
-    text = f"""
-<b>Kicked By:</b> {action_by}
-    <b>Kicked User:</b> {user.mention}
-"""
-    if reason:
-        text += f'    <b>Reason:</b> <code>{reason}</code>'
-    return await m.reply_msg(text)
+    except Exception as e:
+        return await m.reply_msg(f"Failed to get user: {str(e)}")
+    if user.id == c.me.id:
+        return await m.reply_msg("I can't kick myself.")
+    try:
+        await m.chat.ban_member(user.id)
+        await m.chat.unban_member(user.id)
+        message = f'Kicked {user.mention} (ID: {user.id}) successfully!'
+        await m.reply_msg(message)
+        await c.send_message(
+            chat_id=c.config.CHAT_LOG,
+            text=f"Kick: {m.from_user.mention} (ID: {m.from_user.id}) kicked {user.mention} (ID: {user.id})"
+        )
+    except Exception as e:
+        return await m.reply_msg(f"Failed to kick: {str(e)}")
 
-
-@Client.on_message(
-    filters.command(
-        ['ban', 'dban', 'tban', 'unban'],
-    ) & ~filters.private,
-)
+@Client.on_message(filters.command(['ban', 'tban', 'dban', 'unban']) & ~filters.private)
 @func.require_admin('can_restrict_members')
 async def ban_member_handler(c: Client, m: types.Message):
     command = m.command[0]
-    lol = f"I can't {command} myself."
-    no_user = "I can't find that user."
     user_id, reason = await func.user_and_reason(m)
-
-    if not user_id:
-        return await m.reply_msg(no_user)
-    if user_id == c.me.id:
-        return await m.reply_msg(lol)
-
-    time_ban = None
-    if command == 'tban' and len(m.command) > 1:
-        time_ban = time.format_datetime(m.text.split(None, 1)[1])
-
+    try:
+        await ensure_user_known(c, m.chat.id, int(user_id))
+        await check_bot_permissions(c, m.chat.id)
+        await check_target_admin(c, m.chat.id, int(user_id))
+        user = await c.get_users(int(user_id))
+    except (ValueError, PermissionError) as e:
+        return await m.reply_msg(str(e))
+    except Exception as e:
+        return await m.reply_msg(f"Failed to get user: {str(e)}")
+    if user.id == c.me.id:
+        return await m.reply_msg(f"I can't {command} myself.")
     if command == 'unban':
         try:
-            await m.chat.unban_member(user_id)
-        except errors.ChatAdminRequired:
-            return await m.chat.leave()
-        except errors.UserAdminInvalid:
-            return await m.reply_msg(
-                (
-                    'The action requires admin privileges. '
-                    'Probably you tried to edit admin privileges '
-                    "on someone you don't have rights to"
-                ),
+            await m.chat.unban_member(user.id)
+            permissions = await get_group_permissions(m.chat)
+            await m.chat.restrict_member(user.id, permissions)
+            message = f'Unbanned {user.mention} (ID: {user.id}) successfully!'
+            await m.reply_msg(message)
+            await c.send_message(
+                chat_id=c.config.CHAT_LOG,
+                text=f"Unban: {m.from_user.mention} (ID: {m.from_user.id}) unbanned {user.mention} (ID: {user.id})"
             )
         except Exception as e:
-            c.log.info(f'{command} : {str(e)}')
-            return
-        user = await c.get_users(user_id)
-        return await m.reply_msg(f'Un-Banned {user.mention}')
-
-    if command == 'tban' and time_ban:
-        _format = {
-            'user_id': user_id,
-            'until_date': time_ban,
-        }
+            return await m.reply_msg(f"Failed to unban: {str(e)}")
     else:
-        if command == 'dban' and (rep := m.reply_to_message):
-            await asyncio.gather(
-                rep.delete(),
-                m.delete(),
+        time_ban = None
+        if command in ['tban', 'dban'] and len(m.command) > 1:
+            time_ban = time.format_datetime(m.text.split(None, 1)[1])
+        _format = {'user_id': user.id}
+        if time_ban:
+            _format['until_date'] = time_ban
+        try:
+            await m.chat.ban_member(**_format)
+            message = f'Banned {user.mention} (ID: {user.id}) successfully!'
+            await m.reply_msg(
+                message,
+                reply_markup=ikb([[('UnBanned', f'restrict banned|{user.id}')]])
             )
-        _format = {'user_id': user_id}
+            await c.send_message(
+                chat_id=c.config.CHAT_LOG,
+                text=f"Ban: {m.from_user.mention} (ID: {m.from_user.id}) banned {user.mention} (ID: {user.id})"
+            )
+        except errors.ChatAdminRequired:
+            return await m.chat.leave()
 
-    try:
-        await m.chat.ban_member(**_format)
-    except errors.ChatAdminRequired:
-        return await m.chat.leave()
-    except errors.UserAdminInvalid:
-        return await m.reply_msg(
-            (
-                'The action requires admin privileges. '
-                'Probably you tried to edit admin privileges '
-                "on someone you don't have rights to"
-            ),
-        )
-    except errors.RPCError as e:
-        return await m.reply_msg(str(e), quote=True)
-
-    action_by = 'Anon' if not m.from_user else m.from_user.mention
-    user = await c.get_users(user_id)
-    text = f"""
-<b>Banned By:</b> {action_by}
-    <b>Banned User:</b> {user.mention}
-"""
-    if time_ban:
-        time_ban = time_ban + td(hours=7)
-        text += (
-            '    <b>Until:</b> '
-            f"<code>{time_ban.strftime('%d/%m/%Y %H:%M')} (UTC+7H)</code>\n"
-        )
-    if reason:
-        text += f'    <b>Reason:</b> <code>{reason}</code>'
-
-    return await m.reply_msg(
-        text,
-        reply_markup=ikb(
-            [[('UnBanned', f'restrict banned|{user.id}')]],
-        ),
-    )
-
-
-@Client.on_message(
-    filters.command(
-        ['mute', 'dmute', 'tmute', 'unmute'],
-    ) & ~filters.private,
-)
+@Client.on_message(filters.command(['mute', 'tmute', 'dmute', 'unmute']) & ~filters.private)
 @func.require_admin('can_restrict_members')
-async def muted_member_handler(c: Client, m: types.Message):
+async def mute_member_handler(c: Client, m: types.Message):
     command = m.command[0]
-    lol = f"I can't {command} myself."
-    no_user = "I can't find that user."
     user_id, reason = await func.user_and_reason(m)
-    time_mute = None
-    if not user_id:
-        return await m.reply_msg(no_user)
-    if user_id == c.me.id:
-        return await m.reply_msg(lol)
-
-    time_mute = None
-    if command == 'tmute' and len(m.command) > 1:
-        time_mute = time.format_datetime(m.text.split(None, 1)[1])
-
+    try:
+        await ensure_user_known(c, m.chat.id, int(user_id))
+        await check_bot_permissions(c, m.chat.id)
+        await check_target_admin(c, m.chat.id, int(user_id))
+        user = await c.get_users(int(user_id))
+    except (ValueError, PermissionError) as e:
+        return await m.reply_msg(str(e))
+    except Exception as e:
+        return await m.reply_msg(f"Failed to get user: {str(e)}")
+    if user.id == c.me.id:
+        return await m.reply_msg(f"I can't {command} myself.")
     if command == 'unmute':
         try:
-            await m.chat.restrict_member(
-                user_id, types.ChatPermissions(all_perms=True),
+            permissions = await get_group_permissions(m.chat)
+            await m.chat.restrict_member(user.id, permissions)
+            message = f'Unmuted {user.mention} (ID: {user.id}) successfully!'
+            await m.reply_msg(message)
+            await c.send_message(
+                chat_id=c.config.CHAT_LOG,
+                text=f"Unmute: {m.from_user.mention} (ID: {m.from_user.id}) unmuted {user.mention} (ID: {user.id})"
+            )
+        except Exception as e:
+            return await m.reply_msg(f"Failed to unmute: {str(e)}")
+    else:
+        time_mute = None
+        if command in ['tmute', 'dmute'] and len(m.command) > 1:
+            time_mute = time.format_datetime(m.text.split(None, 1)[1])
+        _format = {
+            'user_id': user.id,
+            'permissions': types.ChatPermissions(all_perms=False)
+        }
+        if time_mute:
+            _format['until_date'] = time_mute
+        try:
+            await m.chat.restrict_member(**_format)
+            message = f'Muted {user.mention} (ID: {user.id}) successfully!'
+            await m.reply_msg(
+                message,
+                reply_markup=ikb([[('UnMuted', f'restrict muted|{user.id}')]])
+            )
+            await c.send_message(
+                chat_id=c.config.CHAT_LOG,
+                text=f"Mute: {m.from_user.mention} (ID: {m.from_user.id}) muted {user.mention} (ID: {user.id})"
             )
         except errors.ChatAdminRequired:
             return await m.chat.leave()
-        except errors.UserAdminInvalid:
-            return await m.reply_msg(
-                (
-                    'The action requires admin privileges. '
-                    'Probably you tried to edit admin privileges '
-                    "on someone you don't have rights to"
-                ),
-            )
-        except Exception as e:
-            c.log.info(f'{command} : {str(e)}')
-            return
-        user = await c.get_users(user_id)
-        return await m.reply_msg(f'Un-Muted {user.mention}')
-    if command == 'tmute' and time_mute:
-        _format = {
-            'user_id': user_id,
-            'permissions': types.ChatPermissions(all_perms=False),
-            'until_date': time_mute,
-        }
-    else:
-        if command == 'dmute' and (rep := m.reply_to_message):
-            await asyncio.gather(
-                rep.delete,
-                m.delete,
-            )
-        _format = {
-            'user_id': user_id,
-            'permissions': types.ChatPermissions(all_perms=False),
-        }
-    try:
-        await m.chat.restrict_member(**_format)
-    except errors.ChatAdminRequired:
-        return await m.chat.leave()
-    except errors.UserAdminInvalid:
-        return await m.reply_msg(
-            (
-                'The action requires admin privileges. '
-                'Probably you tried to edit admin privileges '
-                "on someone you don't have rights to"
-            ),
-        )
-    except errors.RPCError as e:
-        return await m.reply_msg(str(e))
-    action_by = 'Anon' if not m.from_user else m.from_user.mention
-    user = await c.get_users(user_id)
-    text = f"""
-<b>Muted By:</b> {action_by}
-    <b>Muted User:</b> {user.mention}
-"""
-    if time_mute:
-        time_mute = time_mute + td(hours=7)
-        text += (
-            '    <b>Until:</b> '
-            f"<code>{time_mute.strftime('%d-%m-%Y %H:%M')} (UTC+7H)</code>\n"
-        )
-    if reason:
-        text += f'    <b>Reason:</b> <code>{reason}</code>'
-
-    return await m.reply_msg(
-        text,
-        reply_markup=ikb(
-            [[('UnMuted', f'restrict muted|{user.id}')]],
-        ),
-    )
-
-
-@Client.on_callback_query(filters.regex(r'^restrict'))
-@func.require_admin('can_restrict_members')
-async def cb_restricted_member(c: Client, cb: types.CallbackQuery):
-    action, user_id = cb.data.strip().split(None, 1)[1].split('|')
-    try:
-        await cb.message.chat.unban_member(int(user_id))
-    except Exception as e:
-        return await cb.answer(str(e), show_alert=True)
-    return await cb.message.edit_msg(
-        '{}\n\n~ <b>User is not {}</b>'.format(
-            cb.message.text.html, action.title(),
-        ),
-    )

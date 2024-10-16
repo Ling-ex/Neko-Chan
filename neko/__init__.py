@@ -1,9 +1,16 @@
+
 from importlib import import_module
 
 from .plugins import load_plugins
 
 CMD_HELP = {}
 
+def get_client():
+    """
+    Fungsi untuk impor dan mengembalikan kelas Client.
+    """
+    from .neko import Client
+    return Client
 
 async def init_plugins():
     """
