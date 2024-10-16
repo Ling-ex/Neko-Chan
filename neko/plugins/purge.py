@@ -5,11 +5,9 @@ from pyrogram.enums import ChatType
 from pyrogram.errors import MessageDeleteForbidden, RPCError
 
 from neko.utils.filters import admins_only
-from neko.utils import func
 from neko.neko import Client
 
 @Client.on_message(filters.command("purge") & filters.group & admins_only)
-@func.require_admin('can_delete_messages')
 async def purge(client: Client, message: Message):
     if not message.reply_to_message:
         await message.reply_text("Reply to a message to delete all following messages.")
@@ -41,7 +39,6 @@ async def purge(client: Client, message: Message):
     await confirmation.delete()
 
 @Client.on_message(filters.command("del") & filters.group & admins_only)
-@func.require_admin('can_delete_messages')
 async def delete_message(client: Client, message: Message):
     if message.reply_to_message:
         try:

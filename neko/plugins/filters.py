@@ -4,14 +4,12 @@ from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 
 from neko.models.filters import add_filter, get_filter, get_all_filters, delete_filter, delete_all_filters
 from neko.neko import Client
-from neko.utils import func
 from config import Config
 from neko.utils.filters import admins_only
 
 chat_log = Config.CHAT_LOG
 
 @Client.on_message(filters.command("filters") & filters.group & admins_only)
-@func.require_admin('can_delete_messages')
 async def view_filters(client: Client, m: Message):
     filters_list = await get_all_filters(m.chat.id)
     if not filters_list:
@@ -22,7 +20,6 @@ async def view_filters(client: Client, m: Message):
     await m.reply_text(f"Active filters:\n{filters_text}", parse_mode=enums.ParseMode.HTML)
 
 @Client.on_message(filters.command(["filter", "addfilter"]) & filters.group & admins_only)
-@func.require_admin('can_delete_messages')
 async def add_filter_command(client: Client, m: Message):
     if len(m.command) < 2:
         await m.reply_text("Usage: /filter <keyword> <reply_message> or reply to a message with /filter <keyword>")
@@ -56,7 +53,6 @@ async def add_filter_command(client: Client, m: Message):
     await m.reply_text(f"Filter '<code>{keyword}</code>' has been set.", parse_mode=enums.ParseMode.HTML)
 
 @Client.on_message(filters.command("unfilter") & filters.group & admins_only)
-@func.require_admin('can_delete_messages')
 async def remove_filter_command(client: Client, m: Message):
     if len(m.command) < 2:
         await m.reply_text("Usage: /unfilter <keyword>")
@@ -75,7 +71,6 @@ async def remove_filter_command(client: Client, m: Message):
         await m.reply_text(f"No such filter '<code>{keyword}</code>' exists.", parse_mode=enums.ParseMode.HTML)
 
 @Client.on_message(filters.command("removeallfilters") & filters.group & admins_only)
-@func.require_admin('can_delete_messages')
 async def remove_all_filters_command(client: Client, m: Message):
     await delete_all_filters(m.chat.id)
     if chat_log != 0 and chat_log is not None:
