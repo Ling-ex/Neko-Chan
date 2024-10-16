@@ -66,8 +66,7 @@ def _owner_chats():
 def _admins_chats():
     """
     Creates a filter that only allows access to messages sent by admins or the owner in a group.
-    If the user is not an admin, it sends an error message.
-    
+
     Returns:
         Filter: A filter that checks if the sender is an admin or the owner in a group.
     """  # noqa: E501
@@ -80,7 +79,7 @@ def _admins_chats():
         if sender := m.sender_chat:
             return True if sender.id == m.chat.id else False
         try:
-            user = await m.chat.get_member(m.from_user.id)
+            user = await m.chat.get_member(msg.from_user.id)
         except (
             errors.UserNotParticipant,
             errors.PeerIdInvalid,
@@ -95,8 +94,6 @@ def _admins_chats():
             )
         ):
             return True
-        
-        await m.reply_text("You cannot perform this action because you are not an administrator.")
         return False
 
     return filters.create(func, 'FilterOnlyAdmins')
