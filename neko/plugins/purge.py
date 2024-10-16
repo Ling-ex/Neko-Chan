@@ -1,8 +1,10 @@
 from asyncio import sleep
-from pyrogram import Client, filters
+from pyrogram import filters
 from pyrogram.enums import ChatType
 from pyrogram.errors import MessageDeleteForbidden, RPCError
 from pyrogram.types import Message
+
+from neko.neko import Client
 from neko.utils import func
 
 @Client.on_message(filters.command("purge") & ~filters.private)
