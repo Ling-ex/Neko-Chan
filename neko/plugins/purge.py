@@ -1,60 +1,55 @@
 from asyncio import sleep
 from pyrogram import filters
+from pyrogram.types import Message
 from pyrogram.enums import ChatType
 from pyrogram.errors import MessageDeleteForbidden, RPCError
-from pyrogram.types import Message
 
-from neko.neko import Client
+from neko.utils.filters import admins_only
 from neko.utils import func
+from neko.neko import Client
 
-@Client.on_message(filters.command("purge") & ~filters.private)
-@func.require_admin('can_delete_messages')
-async def purge_handler(c: Client, m: Message):
-    if m.chat.type != ChatType.SUPERGROUP:
-        await m.reply_text("Cannot purge messages in a basic group.")
+@Client.on_message(filters.command("purge") & filters.group & admins_only)
+async def purge(client: Client, message: Message):
+    await func.require_admin('can_delete_messages')(client, message)
+
+    if not message.reply_to_message:
+        await message.reply_text("Reply to a message to delete all following messages.")
         return
 
-    if not m.reply_to_message:
-        await m.reply_text("Reply to a message to start purging!")
-        return
+    await message.delete()
 
-    message_ids = list(range(m.reply_to_message.id, m.id))
-
-    def divide_chunks(lst, n=100):
-        for i in range(0, len(lst), n):
-            yield lst[i:i + n]
-
-    message_chunks = list(divide_chunks(message_ids))
-
-    try:
-        for chunk in message_chunks:
-            await c.delete_messages(
-                chat_id=m.chat.id,
-                message_ids=chunk,
-                revoke=True,
+    purge_count = 0
+    for msg_id in range(message.reply_to_message.id, message.id):
+        try:
+            await client.delete_messages(
+                chat_id=message.chat.id,
+                message_ids=msg_id,
+                revoke=True
             )
-        await m.delete()
-    except MessageDeleteForbidden:
-        await m.reply_text(
-            "Cannot delete all messages. Messages may be too old, or I might not have the right permissions."
-        )
-    except RPCError as e:
-        await m.reply_text(
-            f"An error occurred:\n\n<b>Error:</b> <code>{e}</code>"
-        )
+            purge_count += 1
+            await sleep(0.1)  # Delay kecil agar tidak terkena rate limit
+        except MessageDeleteForbidden:
+            await message.reply_text("I don't have permission to delete some messages.")
+        except RPCError as e:
+            print(f"Failed to delete message {msg_id}: {e}")
 
-    count_del_msg = len(message_ids)
-    confirmation = await m.reply_text(f"Deleted <i>{count_del_msg}</i> messages.")
-    await sleep(3)
-    await confirmation.delete()
+    await client.send_message(
+        chat_id=message.chat.id,
+        text=f"Purged <b>{purge_count}</b> messages.",
+        parse_mode="html"
+    )
 
-@Client.on_message(filters.command("del") & ~filters.private)
-@func.require_admin('can_delete_messages')
-async def delete_message_handler(c: Client, m: Message):
-    if m.chat.type != ChatType.SUPERGROUP:
-        return
+@Client.on_message(filters.command("del") & filters.group & admins_only)
+async def delete_message(client: Client, message: Message):
+    await func.require_admin('can_delete_messages')(client, message)
 
-    if m.reply_to_message:
-        await c.delete_messages(m.chat.id, [m.reply_to_message.id, m.id])
+    if message.reply_to_message:
+        try:
+            await message.reply_to_message.delete()
+            await message.delete()
+        except MessageDeleteForbidden:
+            await message.reply_text("I don't have permission to delete that message.")
+        except RPCError as e:
+            print(f"Failed to delete message: {e}")
     else:
-        await m.reply_text("Reply to a message to delete it!")
+        await message.reply_text("Reply to a message to delete it.")
